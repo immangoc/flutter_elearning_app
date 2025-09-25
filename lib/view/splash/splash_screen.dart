@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';                 // ✅ cần cho context.read
+import 'package:get/get.dart';
+
+import '../../bloc/auth/auth_bloc.dart';
+import '../../routes/app_routes.dart';
+import '../../services/storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,28 +28,43 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 2),
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
+        .animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
     _animationController.forward();
 
-    Future.delayed(const Duration(seconds: 3), () {});
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted || _hasNavigated) return;
+      _handleNavigation(context);
+    });
+  }
+
+  void _handleNavigation(BuildContext context) {
+    if (_hasNavigated) return;
+    _hasNavigated = true;
+
+    final authState = context.read<AuthBloc>().state;
+
+    if (StorageService.isFirstTime()) {
+      StorageService.setFirstTime(false);
+      Get.offNamed(AppRoutes.onboarding);
+    } else if (authState.userModel != null) {
+      Get.offNamed(AppRoutes.home);          // ✅ dùng GetX, bỏ Navigator để tránh double push
+    } else {
+      Get.offNamed(AppRoutes.login);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -80,6 +101,41 @@ class _SplashScreenState extends State<SplashScreen>
                         size: 80,
                         color: theme.colorScheme.primary,
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Column(
+                      children: [
+                        Text(
+                          'E - Learning',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: theme.colorScheme.surface,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Learn Anytime, Anywhere',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.surface.withOpacity(0.7),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 60),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.surface,
                     ),
                   ),
                 ),
