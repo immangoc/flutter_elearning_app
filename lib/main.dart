@@ -6,7 +6,7 @@ import 'package:get_storage/get_storage.dart';
 
 import 'package:e_learning/bloc/font/font_bloc.dart';
 import 'package:e_learning/bloc/font/font_state.dart';
-import 'package:e_learning/bloc/auth/auth_bloc.dart';   // 👈 THÊM: đường dẫn tới AuthBloc của bạn
+import 'package:e_learning/bloc/auth/auth_bloc.dart';
 import 'package:e_learning/core/theme/app_theme.dart';
 import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/routes/route_pages.dart';
@@ -17,6 +17,7 @@ Future<void> main() async {
 
 
   await StorageService.init();
+  //await GetStorage().erase();
   runApp(const MyApp());
 }
 
