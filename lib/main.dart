@@ -17,7 +17,7 @@ Future<void> main() async {
 
 
   await StorageService.init();
-  //await GetStorage().erase();
+  await GetStorage().erase();
   runApp(const MyApp());
 }
 

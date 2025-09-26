@@ -3,13 +3,18 @@ import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:e_learning/view/splash/splash_screen.dart';
 
-import '../view/auth/login_screen.dart'; // <-- Thêm import SplashScreen
+import '../view/auth/forgot_password_screen.dart';
+import '../view/auth/login_screen.dart';
+import '../view/auth/register_screen.dart'; // <-- Thêm import SplashScreen
 
 class AppRoutes {
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
+  static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
   static const String home = '/home';
+
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -26,6 +31,16 @@ class AppRoutes {
       case login:
         return MaterialPageRoute(
           builder: (_) => const LoginScreen(),
+        );
+
+      case register:
+        return MaterialPageRoute(
+          builder: (_) => const RegisterScreen(),
+        );
+
+      case forgotPassword:
+        return MaterialPageRoute(
+          builder: (_) => const ForgotPasswordScreen(),
         );
 
       case home:

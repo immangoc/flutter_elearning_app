@@ -1,9 +1,12 @@
+import 'package:e_learning/view/auth/forgot_password_screen.dart';
 import 'package:e_learning/view/auth/login_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:get/get.dart';
-import 'package:e_learning/routes/app_routes.dart';           // ✅ import AppRoutes
-import 'package:e_learning/view/splash/splash_screen.dart'; // ✅ import SplashScreen
+import 'package:e_learning/routes/app_routes.dart';
+import 'package:e_learning/view/splash/splash_screen.dart';
+
+import '../view/auth/register_screen.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -20,6 +23,16 @@ class AppPages {
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.register,
+      page: () => const RegisterScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordScreen(),
     ),
 
     GetPage(
