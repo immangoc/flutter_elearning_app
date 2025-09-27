@@ -5,9 +5,11 @@ import 'package:e_learning/view/splash/splash_screen.dart';
 
 import '../view/auth/forgot_password_screen.dart';
 import '../view/auth/login_screen.dart';
-import '../view/auth/register_screen.dart'; // <-- Thêm import SplashScreen
+import '../view/auth/register_screen.dart';
+import '../view/teacher/teacher_home_screen.dart'; // <-- Thêm import SplashScreen
 
 class AppRoutes {
+  //Auth Routes
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
@@ -15,6 +17,8 @@ class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String home = '/home';
 
+  //Teacher
+  static const String teacherHome = '/teacher/home';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -46,6 +50,11 @@ class AppRoutes {
       case home:
         return MaterialPageRoute(
           builder: (_) => const HomeScreen(),
+        );
+
+      case teacherHome:
+        return MaterialPageRoute(
+          builder: (_) => const TeacherHomeScreen(),
         );
 
       default:
