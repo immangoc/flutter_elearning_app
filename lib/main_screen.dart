@@ -26,13 +26,14 @@ class MainScreen extends StatelessWidget {
             backgroundColor: AppColors.lightBackground,
             body: IndexedStack(
               index: state.currentIndex,
-              children: const [
+              children: [
                 HomeScreen(),
                 CourseListScreen(),
                 QuizListScreen(),
                 ProfileScreen(),
               ],
             ),
+
             bottomNavigationBar: NavigationBar(
               backgroundColor: AppColors.accent,
               indicatorColor: AppColors.primary.withOpacity(0.1),
