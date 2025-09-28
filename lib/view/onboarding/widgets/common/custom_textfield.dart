@@ -4,7 +4,6 @@ class CustomTextfield extends StatefulWidget {
   final String label;
   final String? hint;
   final IconData? prefixIcon;
-  final IconData? suffixIcon;
   final bool obscureText;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
@@ -19,7 +18,6 @@ class CustomTextfield extends StatefulWidget {
     required this.label,
     this.hint,
     this.prefixIcon,
-    this.suffixIcon,
     this.obscureText = false,
     this.controller,
     this.validator,
@@ -60,15 +58,17 @@ class _CustomTextfieldState extends State<CustomTextfield> {
         prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
         suffixIcon: widget.obscureText
             ? IconButton(
-          onPressed: () {},
           icon: Icon(
             _obscureText
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
         )
-            : widget.suffixIcon != null
-            ? Icon(widget.suffixIcon)
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

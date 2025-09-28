@@ -13,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _obscure = true;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -27,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      Get.offAllNamed(AppRoutes.home);
+      Get.offAllNamed(AppRoutes.main);
     }
   }
 
@@ -93,16 +92,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Password
-                    CustomTextfield(
+                    CustomTextfield
+                      (
                       label: 'Password',
                       prefixIcon: Icons.lock_outline,
                       controller: _passwordController,
-                      obscureText: _obscure,
+                      obscureText: true,
                       validator: FormValidator.validatePassword,
-                      suffixIcon: _obscure
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
                     ),
                     const SizedBox(height: 20),
 

@@ -1,7 +1,11 @@
+import 'package:e_learning/main_screen.dart';
 import 'package:e_learning/view/auth/forgot_password_screen.dart';
 import 'package:e_learning/view/auth/login_screen.dart';
+import 'package:e_learning/view/course/course_list/course_list_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
+import 'package:e_learning/view/profile/profile_screen.dart';
+import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
 import 'package:e_learning/view/teacher/teacher_home_screen.dart';
 import 'package:get/get.dart';
 import 'package:e_learning/routes/app_routes.dart';
@@ -34,6 +38,26 @@ class AppPages {
     GetPage(
       name: AppRoutes.forgotPassword,
       page: () => const ForgotPasswordScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.main,
+      page: () => const MainScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.courseList,
+      page: () => const CourseListScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.quizList,
+      page: () => const QuizListScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileScreen(),
     ),
 
     GetPage(

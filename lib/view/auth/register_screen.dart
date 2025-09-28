@@ -32,14 +32,82 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  void _selectRole() async {
+    final selected = await showModalBottomSheet<UserRole>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  "Select your role",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ...UserRole.values.map((role) {
+                final roleName = role.toString().split('.').last.capitalize!;
+                final icon = role == UserRole.teacher
+                    ? Icons.school
+                    : Icons.person;
+                return ListTile(
+                  leading: Icon(icon, color: Theme.of(context).primaryColor),
+                  title: Text(roleName),
+                  onTap: () => Navigator.pop(context, role),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedRole = selected;
+      });
+    }
+  }
+
+  void _handleRegister() {
+    if (_formKey.currentState!.validate() && _selectedRole != null) {
+      if (_selectedRole == UserRole.teacher) {
+        Get.offAllNamed(AppRoutes.teacherHome);
+      } else {
+        Get.offAllNamed(AppRoutes.main);
+      }
+    } else if (_selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a role'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    IconData roleIcon;
+    if (_selectedRole == UserRole.teacher) {
+      roleIcon = Icons.school;
+    } else if (_selectedRole == UserRole.student) {
+      roleIcon = Icons.person;
+    } else {
+      roleIcon = Icons.person_outline;
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // top design
+            // Header
             Container(
               height: Get.height * 0.3,
               decoration: BoxDecoration(
@@ -99,8 +167,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-
-                    // Full Name
                     CustomTextfield(
                       label: 'Full Name',
                       hint: 'Enter your full name',
@@ -109,18 +175,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: FormValidator.validateFullName,
                     ),
                     const SizedBox(height: 20),
-
-                    // Email
                     CustomTextfield(
                       label: 'Email',
                       hint: 'Enter your email',
                       prefixIcon: Icons.email_outlined,
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       validator: FormValidator.validateEmail,
                     ),
                     const SizedBox(height: 20),
-
-                    // Password
                     CustomTextfield(
                       label: 'Password',
                       hint: 'Enter your password',
@@ -130,8 +193,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: FormValidator.validatePassword,
                     ),
                     const SizedBox(height: 20),
-
-                    // Confirm Password
                     CustomTextfield(
                       label: 'Confirm Password',
                       hint: 'Re-enter your password',
@@ -145,57 +206,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    DropdownButtonFormField<UserRole>(
-                      decoration: InputDecoration(
-                        labelText: 'Role',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                    // Role Selector (với icon động)
+                    GestureDetector(
+                      onTap: _selectRole,
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Role',
+                          prefixIcon: Icon(roleIcon),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        child: Text(
+                          _selectedRole?.toString().split('.').last.capitalize ??
+                              'Select a role',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _selectedRole == null
+                                ? Colors.grey
+                                : Colors.black,
+                          ),
                         ),
                       ),
-                      value: _selectedRole,
-                      items: UserRole.values
-                          .map(
-                            (role) {
-                            return DropdownMenuItem<UserRole>(
-                              value: role,
-                              child: Text(
-                                role
-                                    .toString()
-                                    .split('.')
-                                    .last
-                                    .capitalize!,
-                              ),
-                            );
-                          })
-                          .toList(),
-                      onChanged: (UserRole? value) {
-                        setState(() {
-                          _selectedRole = value;
-                        });
-                      },
                     ),
+
                     const SizedBox(height: 30),
-                    // Register Button
                     CustomButton(
                       text: 'Register',
                       onPressed: _handleRegister,
                     ),
-
                     const SizedBox(height: 20),
-                    //Login Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-
                       children: [
                         const Text('Already have an account?'),
                         TextButton(
-                          onPressed: (){},
+                          onPressed: () => Get.back(result: AppRoutes.login),
                           child: Text(
                             "Login",
                             style: TextStyle(
@@ -205,8 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                       ],
-                    ),
-
+                    )
                   ],
                 ),
               ),
@@ -215,23 +261,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
-  }
-
-  void _handleRegister() {
-    if (_formKey.currentState!.validate() && _selectedRole != null) {
-      //Handle Registration Logic
-    if (_selectedRole == UserRole.teacher) {
-      Get.offAllNamed(AppRoutes.teacherHome);
-    } else {
-      Get.offAllNamed(AppRoutes.home);
-    }
-  } else if(_selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a role'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 }
