@@ -15,59 +15,35 @@ import '../view/auth/register_screen.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
-    GetPage(
-      name: AppRoutes.splash,
-      page: () => const SplashScreen(),
-    ),
+    GetPage(name: AppRoutes.splash, page: () => const SplashScreen()),
 
-    GetPage(
-      name: AppRoutes.onboarding,
-      page: () => const OnboardingScreen(),
-    ),
+    GetPage(name: AppRoutes.onboarding, page: () => const OnboardingScreen()),
 
-    GetPage(
-      name: AppRoutes.login,
-      page: () => const LoginScreen(),
-    ),
+    GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
 
-    GetPage(
-      name: AppRoutes.register,
-      page: () => const RegisterScreen(),
-    ),
+    GetPage(name: AppRoutes.register, page: () => const RegisterScreen()),
 
     GetPage(
       name: AppRoutes.forgotPassword,
       page: () => const ForgotPasswordScreen(),
     ),
 
-    GetPage(
-      name: AppRoutes.main,
-      page: () => const MainScreen(),
-    ),
+    GetPage(name: AppRoutes.main, page: () => const MainScreen()),
 
     GetPage(
       name: AppRoutes.courseList,
-      page: () => const CourseListScreen(),
+      page: () => CourseListScreen(
+        categoryId: Get.arguments['category'] as String?,
+        categoryName: Get.arguments['categoryName'] as String?,
+      ),
     ),
 
-    GetPage(
-      name: AppRoutes.quizList,
-      page: () => const QuizListScreen(),
-    ),
+    GetPage(name: AppRoutes.quizList, page: () => const QuizListScreen()),
 
-    GetPage(
-      name: AppRoutes.profile,
-      page: () => const ProfileScreen(),
-    ),
+    GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
 
-    GetPage(
-      name: AppRoutes.home,
-      page: () => HomeScreen(),
-    ),
+    GetPage(name: AppRoutes.home, page: () => HomeScreen()),
 
-    GetPage(
-      name: AppRoutes.teacherHome,
-      page: () => const TeacherHomeScreen(),
-    ),
+    GetPage(name: AppRoutes.teacherHome, page: () => const TeacherHomeScreen()),
   ];
 }

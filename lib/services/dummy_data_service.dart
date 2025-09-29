@@ -35,6 +35,7 @@ class DummyDataService {
       rating: 4.5,
       reviewCount: 245,
       enrollmentCount: 1200,
+      isPremium: false,
     ),
     Course(
       id: '2',
@@ -65,6 +66,7 @@ class DummyDataService {
       rating: 4.6,
       reviewCount: 189,
       enrollmentCount: 890,
+      isPremium: true,
     ),
 
     Course(
