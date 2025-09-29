@@ -6,8 +6,15 @@ class CourseListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Course List Screen'),
+      appBar: AppBar(
+        title: const Text('Courses'),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text(
+          'Course List Screen',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }
