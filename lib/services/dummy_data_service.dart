@@ -76,7 +76,7 @@ class DummyDataService {
       imageUrl:
           'https://img.freepik.com/free-vector/online-english-lessons-youtube-thumbnail_23-2149291956.jpg',
       instructorID: 'inst_3',
-      categoryID: '3', // Business
+      categoryID: '3', 
       price: 89.99,
       lessons: _createMarketingLessons(),
       level: 'Intermediate',
