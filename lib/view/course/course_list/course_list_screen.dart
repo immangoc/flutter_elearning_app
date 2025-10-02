@@ -38,9 +38,9 @@ class CourseListScreen extends StatelessWidget {
             automaticallyImplyLeading: categoryId != null || showBackButton,
             leading: (categoryId != null || showBackButton)
                 ? IconButton(
-              onPressed: () => Get.back(),
-              icon: const Icon(Icons.arrow_back),
-            )
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.arrow_back),
+                  )
                 : null,
             actions: [
               IconButton(
@@ -60,10 +60,7 @@ class CourseListScreen extends StatelessWidget {
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primaryLight,
-                    ],
+                    colors: [AppColors.primary, AppColors.primaryLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -74,29 +71,24 @@ class CourseListScreen extends StatelessWidget {
 
           if (courses.isEmpty)
             SliverFillRemaining(
-              child: EmptyStateWidget(
-                onActionPressed: () => Get.back(),
-              ),
+              child: EmptyStateWidget(onActionPressed: () => Get.back()),
             )
           else
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    final course = courses[index];
-                    return CourseCard(
-                      courseId: course.id,
-                      title: course.title,
-                      subtitle: course.description,
-                      imageUrl: course.imageUrl,
-                      rating: course.rating,
-                      duration: '${course.lessons.length * 30} mins',
-                      isPremium: course.isPremium,
-                    );
-                  },
-                  childCount: courses.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final course = courses[index];
+                  return CourseCard(
+                    courseId: course.id,
+                    title: course.title,
+                    subtitle: course.description,
+                    imageUrl: course.imageUrl,
+                    rating: course.rating,
+                    duration: '${course.lessons.length * 30} mins',
+                    isPremium: course.isPremium,
+                  );
+                }, childCount: courses.length),
               ),
             ),
         ],
