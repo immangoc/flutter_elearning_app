@@ -274,6 +274,15 @@ class DummyDataService {
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       isActive: true,
     ),
+    Quiz(
+      id: '1',
+      title: 'Flutter State Management Quiz',
+      description: 'Evaluate your understanding of state management in Flutter',
+      timeLimit: 20,
+      questions: _createStateManagementQuizQuestions(),
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      isActive: true,
+    ),
   ];
 
   static final List<QuizAttempt> quizAttempts = [];
