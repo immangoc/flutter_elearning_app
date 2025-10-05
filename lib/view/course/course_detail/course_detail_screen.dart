@@ -1,3 +1,4 @@
+import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/services/dummy_data_service.dart';
 import 'package:e_learning/view/course/course_detail/widgets/action_buttons.dart';
 import 'package:e_learning/view/course/course_detail/widgets/course_detail_app_bar.dart';
@@ -114,6 +115,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   //navigate to payment screen
+                  Get.toNamed(
+                    AppRoutes.payment,
+                    arguments: {
+                      'courseId': widget.courseId,
+                      'courseName': course.title,
+                      'price': course.price,
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

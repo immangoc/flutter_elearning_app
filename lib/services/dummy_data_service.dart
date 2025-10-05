@@ -523,6 +523,10 @@ class DummyDataService {
   // Add a set to store purchased course IDs
   static final Set<String> _purchasedCourseIds = {};
 
+  static void addPurchasedCourse(String courseId) {
+    _purchasedCourseIds.add(courseId);
+  }
+
   // Add methods to manage purchased courses
   static bool isCourseUnlocked(String courseId) {
     final course = getCourseById(courseId);

@@ -10,6 +10,7 @@ import '../view/auth/forgot_password_screen.dart';
 import '../view/auth/login_screen.dart';
 import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
+import '../view/course/payment/payment_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/teacher/teacher_home_screen.dart';
 
@@ -28,6 +29,7 @@ class AppRoutes {
   //Course
   static const String courseList = '/courses';
   static const String courseDetail = '/course/:id';
+  static const String payment = '/payment';
 
   // Quiz
   static const String quizList = '/quizzes';
@@ -96,6 +98,16 @@ class AppRoutes {
 
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case payment:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => PaymentScreen(
+            courseId: args['courseId'] ?? '',
+            courseName: args['courseName'] ?? '',
+            price: args['price'] ?? 0.0,
+          ),
+        );
 
       default:
         return MaterialPageRoute(
