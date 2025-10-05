@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-
+import 'package:get/get.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../services/dummy_data_service.dart';
 
@@ -15,9 +15,9 @@ class InProgressSection extends StatelessWidget {
     final inProgressCourses = DummyDataService.courses
         .where(
           (course) =>
-      course.lessons.any((lesson) => lesson.isCompleted) &&
-          !course.lessons.every((lesson) => lesson.isCompleted),
-    )
+              course.lessons.any((lesson) => lesson.isCompleted) &&
+              !course.lessons.every((lesson) => lesson.isCompleted),
+        )
         .toList();
 
     return Column(
@@ -34,8 +34,9 @@ class InProgressSection extends StatelessWidget {
         if (inProgressCourses.isEmpty) const SizedBox.shrink(),
         Column(
           children: inProgressCourses.map((course) {
-            final completedLessons =
-                course.lessons.where((lesson) => lesson.isCompleted).length;
+            final completedLessons = course.lessons
+                .where((lesson) => lesson.isCompleted)
+                .length;
             final totalLessons = course.lessons.length;
             final progress = completedLessons / totalLessons;
 
@@ -77,11 +78,14 @@ class InProgressSection extends StatelessWidget {
                               child: CachedNetworkImage(
                                 imageUrl: course.imageUrl,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => Shimmer.fromColors(
-                                  baseColor: AppColors.primary.withOpacity(0.1),
-                                  highlightColor: AppColors.accent,
-                                  child: Container(color: Colors.white),
-                                ),
+                                placeholder: (context, url) =>
+                                    Shimmer.fromColors(
+                                      baseColor: AppColors.primary.withOpacity(
+                                        0.1,
+                                      ),
+                                      highlightColor: AppColors.accent,
+                                      child: Container(color: Colors.white),
+                                    ),
                                 errorWidget: (context, url, error) => Container(
                                   color: AppColors.primary.withOpacity(0.1),
                                   child: const Icon(Icons.error),
@@ -112,10 +116,12 @@ class InProgressSection extends StatelessWidget {
 
                                 LinearProgressIndicator(
                                   value: progress,
-                                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                                  valueColor: const AlwaysStoppedAnimation<Color>(
-                                    AppColors.primary,
-                                  ),
+                                  backgroundColor: AppColors.primary
+                                      .withOpacity(0.1),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        AppColors.primary,
+                                      ),
                                 ),
                               ],
                             ),
@@ -137,8 +143,13 @@ class InProgressSection extends StatelessWidget {
     BuildContext context,
     String courseId,
     int lastLesson,
-)
-  {
-    //
+  ) {
+    Get.toNamed(
+      '/course/$courseId',
+      parameters: {
+        'id' : courseId,
+        'lastLesson' : lastLesson.toString(),
+      },
+    );
   }
 }

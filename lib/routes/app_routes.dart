@@ -9,6 +9,7 @@ import 'package:e_learning/view/splash/splash_screen.dart';
 import '../view/auth/forgot_password_screen.dart';
 import '../view/auth/login_screen.dart';
 import '../view/auth/register_screen.dart';
+import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/teacher/teacher_home_screen.dart';
 
@@ -26,6 +27,7 @@ class AppRoutes {
 
   //Course
   static const String courseList = '/courses';
+  static const String courseDetail = '/course/:id';
 
   // Quiz
   static const String quizList = '/quizzes';
@@ -39,29 +41,19 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case splash:
-        return MaterialPageRoute(
-            builder: (_) => const SplashScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
 
       case onboarding:
-        return MaterialPageRoute(
-            builder: (_) => const OnboardingScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
 
       case login:
-        return MaterialPageRoute(
-            builder: (_) => const LoginScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
 
       case register:
-        return MaterialPageRoute(
-            builder: (_) => const RegisterScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const RegisterScreen());
 
       case forgotPassword:
-        return MaterialPageRoute(
-            builder: (_) => const ForgotPasswordScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
 
       case main:
         return MaterialPageRoute(
@@ -74,44 +66,41 @@ class AppRoutes {
         );
 
       case home:
-        return MaterialPageRoute(
-            builder: (_) => HomeScreen()
-        );
+        return MaterialPageRoute(builder: (_) => HomeScreen());
 
       case teacherHome:
-        return MaterialPageRoute(
-            builder: (_) => const TeacherHomeScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const TeacherHomeScreen());
 
       case courseList:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-            builder: (_) => CourseListScreen(
-              categoryId: args?['category'] as String?,
-              categoryName: args?['categoryName'] as String?,
-
-            ),
+          builder: (_) => CourseListScreen(
+            categoryId: args?['category'] as String?,
+            categoryName: args?['categoryName'] as String?,
+          ),
+        );
+      case courseDetail:
+        String courseId;
+        if (settings.arguments != null) {
+          courseId = settings.arguments as String;
+        } else {
+          final uri = Uri.parse(settings.name ?? '');
+          courseId = uri.pathSegments.last;
+        }
+        return MaterialPageRoute(
+          builder: (_) => CourseDetailScreen(courseId: courseId),
         );
 
       case quizList:
-        return MaterialPageRoute(
-            builder: (_) => const QuizListScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const QuizListScreen());
 
       case profile:
-        return MaterialPageRoute(
-            builder: (_) => const ProfileScreen()
-        );
+        return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
       default:
         return MaterialPageRoute(
           builder: (_) =>
-              const Scaffold(
-                  body: Center(
-                      child:
-                      Text('Route not found')
-                  )
-              ),
+              const Scaffold(body: Center(child: Text('Route not found'))),
         );
     }
   }

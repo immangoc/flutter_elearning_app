@@ -1,8 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-
+import 'package:get/get.dart';
 import '../../../../core/theme/app_color.dart';
+import '../../../../routes/app_routes.dart';
 
 class CourseCard extends StatelessWidget {
   final String courseId;
@@ -45,7 +46,10 @@ class CourseCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () => Get.toNamed(
+            AppRoutes.courseDetail.replaceAll(':id', courseId),
+            arguments: courseId,
+          ),
           borderRadius: BorderRadius.circular(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

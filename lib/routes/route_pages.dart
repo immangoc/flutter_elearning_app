@@ -12,6 +12,7 @@ import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/view/splash/splash_screen.dart';
 
 import '../view/auth/register_screen.dart';
+import '../view/course/course_detail/course_detail_screen.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -39,6 +40,11 @@ class AppPages {
     ),
 
     GetPage(name: AppRoutes.quizList, page: () => const QuizListScreen()),
+
+    GetPage(
+      name: '/course/:id',
+      page: () => CourseDetailScreen(courseId: Get.parameters['id'] ?? ''),
+    ),
 
     GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
 
