@@ -13,6 +13,7 @@ import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/course/payment/payment_screen.dart';
 import '../view/profile/profile_screen.dart';
+import '../view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import '../view/teacher/teacher_home_screen.dart';
 
 class AppRoutes {
@@ -34,7 +35,7 @@ class AppRoutes {
   static const String lesson = '/lesson/:id';
   // Quiz
   static const String quizList = '/quizzes';
-
+  static const String quizAttempt = '/quiz/:id';
   // Profile
   static const String profile = '/profile';
 
@@ -96,6 +97,12 @@ class AppRoutes {
 
       case quizList:
         return MaterialPageRoute(builder: (_) => const QuizListScreen());
+
+      case quizAttempt:
+        final quizId = settings.arguments as String?;
+        return MaterialPageRoute(
+          builder: (_) => QuizAttemptScreen(quizId: quizId ?? ''),
+        );
 
       case lesson:
         final lessonId = settings.arguments as String?;
