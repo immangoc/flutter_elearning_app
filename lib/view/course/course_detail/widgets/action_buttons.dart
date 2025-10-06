@@ -1,6 +1,7 @@
 import 'package:e_learning/models/course.dart';
+import 'package:e_learning/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 import '../../../../services/dummy_data_service.dart';
 
 class ActionButtons extends StatelessWidget {
@@ -17,8 +18,20 @@ class ActionButtons extends StatelessWidget {
               if (course.isPremium &&
                   !DummyDataService.isCourseUnlocked(course.id)) {
                 //navigate to payment
+                Get.toNamed(
+                  AppRoutes.payment,
+                  arguments: {
+                    'courseId': course.id,
+                    'courseName': course.title,
+                    'price': course.price,
+                  },
+                );
               } else {
                 //navigate to first lesson
+                Get.toNamed(
+                  AppRoutes.lesson.replaceAll(':id', course.lessons.first.id),
+                  parameters: {'courseId': course.id},
+                );
               }
             },
             label: const Text('Start Learning'),
@@ -29,10 +42,10 @@ class ActionButtons extends StatelessWidget {
         if (!course.isPremium || DummyDataService.isCourseUnlocked(course.id))
           const SizedBox(width: 16),
         IconButton(
-            onPressed: () {
-              //navigate to chat screen
-            },
-            icon: const Icon(Icons.chat),
+          onPressed: () {
+            //navigate to chat screen
+          },
+          icon: const Icon(Icons.chat),
         ),
       ],
     );
