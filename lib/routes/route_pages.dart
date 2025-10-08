@@ -19,6 +19,7 @@ import 'package:e_learning/view/splash/splash_screen.dart';
 import '../models/quiz.dart';
 import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
+import '../view/notifications/notifications_screen.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -80,6 +81,8 @@ class AppPages {
     ),
 
     GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
+
+    GetPage(name: AppRoutes.notifications, page: () => const NotificationsScreen()),
 
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
 

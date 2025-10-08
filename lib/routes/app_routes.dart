@@ -12,6 +12,7 @@ import '../view/auth/login_screen.dart';
 import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/course/payment/payment_screen.dart';
+import '../view/notifications/notifications_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import '../view/teacher/teacher_home_screen.dart';
@@ -39,7 +40,7 @@ class AppRoutes {
   static const String quizResult = '/quiz/result';
   // Profile
   static const String profile = '/profile';
-
+  static const String notifications = '/notifications';
   // Teacher
   static const String teacherHome = '/teacher/home';
 
@@ -113,6 +114,9 @@ class AppRoutes {
 
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsScreen());
 
       case payment:
         final args = settings.arguments as Map<String, dynamic>;
