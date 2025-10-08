@@ -36,6 +36,7 @@ class AppRoutes {
   // Quiz
   static const String quizList = '/quizzes';
   static const String quizAttempt = '/quiz/:id';
+  static const String quizResult = '/quiz/result';
   // Profile
   static const String profile = '/profile';
 

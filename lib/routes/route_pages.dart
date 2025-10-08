@@ -1,4 +1,5 @@
 import 'package:e_learning/main_screen.dart';
+import 'package:e_learning/models/quiz_attempt.dart';
 import 'package:e_learning/view/auth/forgot_password_screen.dart';
 import 'package:e_learning/view/auth/login_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
@@ -9,11 +10,13 @@ import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:e_learning/view/profile/profile_screen.dart';
 import 'package:e_learning/view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
+import 'package:e_learning/view/quiz/quiz_result/quiz_result_screen.dart';
 import 'package:e_learning/view/teacher/teacher_home_screen.dart';
 import 'package:get/get.dart';
 import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/view/splash/splash_screen.dart';
 
+import '../models/quiz.dart';
 import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 
@@ -47,6 +50,14 @@ class AppPages {
     GetPage(
       name: '/quiz/:id',
       page: () => QuizAttemptScreen(quizId: Get.parameters['id'] ?? ''),
+    ),
+
+    GetPage(
+      name: '/quiz/result',
+      page: () => QuizResultScreen(
+        attempt: Get.arguments['attempt'] as QuizAttempt,
+        quiz: Get.arguments['quiz'] as Quiz,
+      ),
     ),
 
     GetPage(
