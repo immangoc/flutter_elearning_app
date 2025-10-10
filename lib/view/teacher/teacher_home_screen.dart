@@ -1,4 +1,10 @@
+import 'package:e_learning/core/theme/app_color.dart';
+import 'package:e_learning/core/utils/app_dialogs.dart';
+import 'package:e_learning/view/teacher/teacher_home/widgets/dashboard_card.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../routes/app_routes.dart';
 
 class TeacherHomeScreen extends StatelessWidget {
   const TeacherHomeScreen({super.key});
@@ -6,8 +12,79 @@ class TeacherHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Teacher Home')
+      backgroundColor: AppColors.lightBackground,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            pinned: true,
+            backgroundColor: AppColors.primary,
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  final confirm = await AppDialogs.showLogoutDialog();
+                  if (confirm == true) {
+                    Get.offAllNamed(AppRoutes.login);
+                  }
+                },
+                icon: Icon(Icons.logout, color: AppColors.accent),
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text(
+                'Teacher Dashboard',
+                style: TextStyle(color: AppColors.accent),
+              ),
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverGrid(
+              delegate: SliverChildListDelegate([
+                DashboardCard(
+                  title: 'My Courses',
+                  icon: Icons.book,
+                  onTap: () => Get.toNamed(AppRoutes.myCourses),
+                ),
+                DashboardCard(
+                  title: 'Create Course',
+                  icon: Icons.add_circle,
+                  onTap: () {},
+                ),
+                DashboardCard(
+                  title: 'Analytics',
+                  icon: Icons.analytics,
+                  onTap: () {},
+                ),
+                DashboardCard(
+                  title: 'Student Progress',
+                  icon: Icons.people,
+                  onTap: () {},
+                ),
+                DashboardCard(
+                  title: 'Messages',
+                  icon: Icons.chat,
+                  onTap: () {},
+                ),
+              ]),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
