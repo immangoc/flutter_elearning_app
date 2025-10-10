@@ -1,4 +1,5 @@
 import 'package:e_learning/main_screen.dart';
+import 'package:e_learning/view/chat/chat_list_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
@@ -45,6 +46,8 @@ class AppRoutes {
   // Teacher
   static const String teacherHome = '/teacher/home';
   static const String myCourses = '/teacher/courses';
+  static const String teacherChats = '/teacher/chats';
+
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -78,6 +81,9 @@ class AppRoutes {
 
       case teacherHome:
         return MaterialPageRoute(builder: (_) => const TeacherHomeScreen());
+
+      case teacherChats:
+        return MaterialPageRoute(builder: (_) => const ChatListScreen());
 
       case myCourses:
         return MaterialPageRoute(builder: (_) => const MyCoursesScreen());
