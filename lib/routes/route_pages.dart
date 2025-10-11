@@ -12,6 +12,7 @@ import 'package:e_learning/view/profile/profile_screen.dart';
 import 'package:e_learning/view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
 import 'package:e_learning/view/quiz/quiz_result/quiz_result_screen.dart';
+import 'package:e_learning/view/teacher/create_course/create_course_screen.dart';
 import 'package:e_learning/view/teacher/my_courses/my_courses_screen.dart';
 import 'package:e_learning/view/teacher/teacher_home_screen.dart';
 import 'package:get/get.dart';
@@ -91,6 +92,8 @@ class AppPages {
     GetPage(name: AppRoutes.teacherHome, page: () => const TeacherHomeScreen()),
 
     GetPage(name: AppRoutes.myCourses, page: () => const MyCoursesScreen()),
+
+    GetPage(name: AppRoutes.createCourse, page: () => const CreateCourseScreen()),
 
     GetPage(name: AppRoutes.teacherChats, page: () => const ChatListScreen()),
   ];

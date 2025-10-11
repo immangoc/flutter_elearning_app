@@ -5,6 +5,7 @@ import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
+import 'package:e_learning/view/teacher/create_course/create_course_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:e_learning/view/splash/splash_screen.dart';
 
@@ -47,7 +48,7 @@ class AppRoutes {
   static const String teacherHome = '/teacher/home';
   static const String myCourses = '/teacher/courses';
   static const String teacherChats = '/teacher/chats';
-
+  static const String createCourse = '/teacher/courses/create';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -88,6 +89,9 @@ class AppRoutes {
       case myCourses:
         return MaterialPageRoute(builder: (_) => const MyCoursesScreen());
 
+      case createCourse:
+        return MaterialPageRoute(builder: (_) => const CreateCourseScreen());
+
       case courseList:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
@@ -96,6 +100,7 @@ class AppRoutes {
             categoryName: args?['categoryName'] as String?,
           ),
         );
+
       case courseDetail:
         String courseId;
         if (settings.arguments != null) {
