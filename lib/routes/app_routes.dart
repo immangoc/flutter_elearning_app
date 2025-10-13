@@ -1,5 +1,6 @@
 import 'package:e_learning/main_screen.dart';
 import 'package:e_learning/view/chat/chat_list_screen.dart';
+import 'package:e_learning/view/course/analytics_dashboard/analytics_dashboard_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
@@ -38,14 +39,18 @@ class AppRoutes {
   static const String courseList = '/courses';
   static const String courseDetail = '/course/:id';
   static const String payment = '/payment';
+  static const String analytics = '/analytics';
   static const String lesson = '/lesson/:id';
+
   // Quiz
   static const String quizList = '/quizzes';
   static const String quizAttempt = '/quiz/:id';
   static const String quizResult = '/quiz/result';
+
   // Profile
   static const String profile = '/profile';
   static const String notifications = '/notifications';
+
   // Teacher
   static const String teacherHome = '/teacher/home';
   static const String myCourses = '/teacher/courses';
@@ -145,6 +150,9 @@ class AppRoutes {
 
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+
+      case analytics:
+        return MaterialPageRoute(builder: (_) => AnalyticsDashboardScreen());
 
       case payment:
         final args = settings.arguments as Map<String, dynamic>;
