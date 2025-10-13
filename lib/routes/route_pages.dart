@@ -7,6 +7,7 @@ import 'package:e_learning/view/course/analytics_dashboard/analytics_dashboard_s
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/course/payment/payment_screen.dart';
+import 'package:e_learning/view/help_and_support/help_and_support_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:e_learning/view/privacy_&_terms_conditions/privacy_policy_screen.dart';
@@ -106,6 +107,8 @@ class AppPages {
     GetPage(name: AppRoutes.privacyPolicy, page: () => const PrivacyPolicyScreen()),
 
     GetPage(name: AppRoutes.termsConditions, page: () => const TermsConditionsScreen()),
+
+    GetPage(name: AppRoutes.helpSupport, page: () => const HelpAndSupportScreen()),
 
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
 

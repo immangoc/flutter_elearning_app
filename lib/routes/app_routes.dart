@@ -3,6 +3,7 @@ import 'package:e_learning/view/chat/chat_list_screen.dart';
 import 'package:e_learning/view/course/analytics_dashboard/analytics_dashboard_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
+import 'package:e_learning/view/help_and_support/help_and_support_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
 import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
@@ -58,6 +59,8 @@ class AppRoutes {
   static const String setting = '/setting';
   static const String privacyPolicy = '/privacy-policy';
   static const String termsConditions = '/terms-conditions';
+  static const String helpSupport = '/help-support';
+
 
   // Teacher
   static const String teacherHome = '/teacher/home';
@@ -170,6 +173,9 @@ class AppRoutes {
 
       case termsConditions:
         return MaterialPageRoute(builder: (_) => const TermsConditionsScreen());
+
+      case helpSupport:
+        return MaterialPageRoute(builder: (_) => const HelpAndSupportScreen());
 
       case analytics:
         return MaterialPageRoute(builder: (_) => AnalyticsDashboardScreen());
