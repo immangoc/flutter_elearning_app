@@ -19,6 +19,7 @@ import '../view/notifications/notifications_screen.dart';
 import '../view/profile/edit_profile_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/quiz/quiz_attempt/quiz_attempt_screen.dart';
+import '../view/settings/settings_screen.dart';
 import '../view/teacher/my_courses/my_courses_screen.dart';
 import '../view/teacher/student_progress/student_progress_screen.dart';
 import '../view/teacher/teacher_analytics/teacher_analytics_screen.dart';
@@ -52,6 +53,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
   static const String notifications = '/notifications';
+  static const String setting = '/setting';
 
   // Teacher
   static const String teacherHome = '/teacher/home';
@@ -155,6 +157,9 @@ class AppRoutes {
 
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+
+      case setting:
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
 
       case analytics:
         return MaterialPageRoute(builder: (_) => AnalyticsDashboardScreen());

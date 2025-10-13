@@ -27,6 +27,7 @@ import '../models/quiz.dart';
 import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/notifications/notifications_screen.dart';
+import '../view/settings/settings_screen.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -97,6 +98,8 @@ class AppPages {
       name: AppRoutes.notifications,
       page: () => const NotificationsScreen(),
     ),
+
+    GetPage(name: AppRoutes.setting, page: () => const SettingsScreen()),
 
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
 
