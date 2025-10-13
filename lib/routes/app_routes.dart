@@ -16,6 +16,7 @@ import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/course/payment/payment_screen.dart';
 import '../view/notifications/notifications_screen.dart';
+import '../view/profile/edit_profile_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import '../view/teacher/my_courses/my_courses_screen.dart';
@@ -49,6 +50,7 @@ class AppRoutes {
 
   // Profile
   static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
   static const String notifications = '/notifications';
 
   // Teacher
@@ -147,6 +149,9 @@ class AppRoutes {
 
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case editProfile:
+        return MaterialPageRoute(builder: (_) => const EditProfileScreen());
 
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());

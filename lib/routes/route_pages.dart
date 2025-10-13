@@ -9,6 +9,7 @@ import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/course/payment/payment_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
 import 'package:e_learning/view/onboarding/onboarding_screen.dart';
+import 'package:e_learning/view/profile/edit_profile_screen.dart';
 import 'package:e_learning/view/profile/profile_screen.dart';
 import 'package:e_learning/view/quiz/quiz_attempt/quiz_attempt_screen.dart';
 import 'package:e_learning/view/quiz/quiz_list/quiz_list_screen.dart';
@@ -87,6 +88,8 @@ class AppPages {
     ),
 
     GetPage(name: AppRoutes.profile, page: () => const ProfileScreen()),
+
+    GetPage(name: AppRoutes.editProfile, page: () => const EditProfileScreen()),
 
     GetPage(name: AppRoutes.analytics, page: () => AnalyticsDashboardScreen()),
 
