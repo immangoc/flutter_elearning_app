@@ -16,6 +16,8 @@ import '../view/auth/register_screen.dart';
 import '../view/course/course_detail/course_detail_screen.dart';
 import '../view/course/payment/payment_screen.dart';
 import '../view/notifications/notifications_screen.dart';
+import '../view/privacy_&_terms_conditions/privacy_policy_screen.dart';
+import '../view/privacy_&_terms_conditions/terms_conditions_screen.dart';
 import '../view/profile/edit_profile_screen.dart';
 import '../view/profile/profile_screen.dart';
 import '../view/quiz/quiz_attempt/quiz_attempt_screen.dart';
@@ -54,6 +56,8 @@ class AppRoutes {
   static const String editProfile = '/profile/edit';
   static const String notifications = '/notifications';
   static const String setting = '/setting';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsConditions = '/terms-conditions';
 
   // Teacher
   static const String teacherHome = '/teacher/home';
@@ -160,6 +164,12 @@ class AppRoutes {
 
       case setting:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
+
+      case privacyPolicy:
+        return MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen());
+
+      case termsConditions:
+        return MaterialPageRoute(builder: (_) => const TermsConditionsScreen());
 
       case analytics:
         return MaterialPageRoute(builder: (_) => AnalyticsDashboardScreen());
