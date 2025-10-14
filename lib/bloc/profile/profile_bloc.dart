@@ -1,0 +1,107 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:e_learning/bloc/auth/auth_state.dart';
+import 'package:e_learning/bloc/profile/profile_event.dart';
+import 'package:e_learning/bloc/profile/profile_state.dart';
+import 'package:e_learning/models/profile_model.dart';
+
+import '../../repositories/auth_repository.dart';
+import '../auth/auth_bloc.dart';
+
+class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final AuthBloc _authBloc;
+  final AuthRepository _authRepository;
+  late final StreamSubscription<AuthState> _authSubscription;
+
+  ProfileBloc({required AuthBloc authBloc, AuthRepository? authRepository})
+    : _authBloc = authBloc,
+      _authRepository = authRepository ?? AuthRepository(),
+      super(const ProfileState()) {
+    on<LoadProfile>(_onLoadProfile);
+    on<UpdateProfileRequested>(_onUpdateProfileRequested);
+    on<UpdateProfilePhotoRequested>(_onUpdateProfilePhotoRequested);
+
+    //load profile when aut state changes
+    _authSubscription = _authBloc.stream.listen((authState) {
+      if(authState.userModel != null) {
+        add(LoadProfile());
+      }
+    });
+
+    //initial load if user is already logged in
+    if(_authBloc.state.userModel != null) {
+      add(LoadProfile());
+    }
+  }
+  Future<void> _onLoadProfile(
+    LoadProfile event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      final userModel = _authBloc.state.userModel;
+      if (userModel != null) {
+        final profile = ProfileModel(
+          fullName: userModel.fullName ?? '',
+          email: userModel.email,
+          photoUrl: userModel.photoUrl,
+          phoneNumber: userModel.phoneNumber,
+          bio: userModel.bio,
+          stats: const ProfileStats(
+            coursesCount: 0,
+            hoursSpent: 0,
+            successRate: 0,
+          ),
+        );
+        emit(state.copyWith(isLoading: false, profile: profile));
+      }
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, error: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateProfileRequested(
+    UpdateProfileRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+
+      await _authRepository.updateProfile(
+        fullName: event.fullName,
+        photoUrl: event.photoUrl,
+        phoneNumber: event.phoneNumber,
+        bio: event.bio,
+      );
+
+      if (state.profile != null) {
+        final updatedProfile = state.profile!.copyWith(
+          fullName: event.fullName,
+          photoUrl: event.photoUrl,
+          phoneNumber: event.phoneNumber,
+          bio: event.bio,
+        );
+        emit(state.copyWith(isLoading: false, profile: updatedProfile));
+      }
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, error: e.toString()));
+    }
+  }
+
+
+  Future<void> _onUpdateProfilePhotoRequested(
+      UpdateProfilePhotoRequested event,
+      Emitter<ProfileState> emit,
+      )async {
+    try {
+      emit(state.copyWith(isLoading: true));
+    }catch (e) {}
+  }
+
+  @override
+  Future<void> close() {
+    _authSubscription.cancel();
+    return super.close();
+  }
+}

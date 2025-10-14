@@ -1,17 +1,24 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../bloc/profile/profile_bloc.dart';
+import '../../../bloc/profile/profile_state.dart';
 import '../../../core/theme/app_color.dart';
 
 class ProfileAppBar extends StatelessWidget {
   final String initials;
   final String fullName;
   final String email;
+  final String? photoUrl;
 
   const ProfileAppBar({
     super.key,
     required this.initials,
     required this.fullName,
     required this.email,
+    this.photoUrl,
   });
 
   @override
@@ -38,20 +45,39 @@ class ProfileAppBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.accent.withOpacity(0.5),
+                    color: AppColors.accent.withValues(alpha: 0.5),
                     width: 2,
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundColor: AppColors.lightSurface,
-                  child: Text(
-                    initials,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                child: BlocBuilder<ProfileBloc, ProfileState>(
+                  builder: (context, state) {
+                    if (state.isPhotoUploading) {
+                      return Shimmer.fromColors(
+                        baseColor: AppColors.primary.withValues(alpha: 0.3),
+                        highlightColor: AppColors.accent,
+                        child: const CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.white,
+                        ),
+                      );
+                    }
+                    return CircleAvatar(
+                      radius: 60,
+                      backgroundColor: AppColors.lightSurface,
+                      backgroundImage: photoUrl != null
+                          ? CachedNetworkImageProvider(photoUrl!)
+                          : null,
+                      child: photoUrl == null
+                          ? Text(
+                              initials,
+                              style: theme.textTheme.displaySmall?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 16),
@@ -66,7 +92,7 @@ class ProfileAppBar extends StatelessWidget {
               Text(
                 email,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: AppColors.accent.withOpacity(0.8),
+                  color: AppColors.accent.withValues(alpha: 0.8),
                 ),
               ),
             ],
