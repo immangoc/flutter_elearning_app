@@ -1,5 +1,6 @@
+import 'package:e_learning/models/user_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';                 // ✅ cần cho context.read
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
@@ -51,12 +52,20 @@ class _SplashScreenState extends State<SplashScreen>
 
     final authState = context.read<AuthBloc>().state;
 
-    if (StorageService.isFirstTime()) {
-      Get.offNamed(AppRoutes.onboarding);
-    } else if (authState.userModel != null) {
-      Get.offNamed(AppRoutes.main);
+    if(StorageService.isFirstTime()){
+      //navigate to onboarding screen
+      StorageService.setFirstTime(false);
+      Get.offAllNamed(AppRoutes.onboarding);
+    }else if(authState.userModel != null){
+      //navigate based on user role
+      if(authState.userModel!.role == UserRole.teacher){
+        Get.offAllNamed(AppRoutes.teacherHome);
+      }else {
+        Get.offAllNamed(AppRoutes.main);
+      }
     } else {
-      Get.offNamed(AppRoutes.login);
+      //navigate to login screen
+      Get.offAllNamed(AppRoutes.login);
     }
   }
 
@@ -89,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -121,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen>
                         Text(
                           'Learn Anytime, Anywhere',
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.surface.withOpacity(0.7),
+                            color: theme.colorScheme.surface.withValues(alpha: 0.7),
                             letterSpacing: 1.2,
                           ),
                         ),

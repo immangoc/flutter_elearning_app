@@ -1,44 +1,65 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
+    kotlin("android")                               // <- was id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
     namespace = "com.example.e_learning"
-    compileSdk = flutter.compileSdkVersion
+
+    // flutter.* are Strings in many templates; convert to Ints
+    compileSdk = flutter.compileSdkVersion.toInt()
     ndkVersion = flutter.ndkVersion
 
+    // AGP 8+ / recent Flutter require Java 17
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.e_learning"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+
+        // Kotlin DSL uses properties, not the old *Version(...) calls
+        minSdk = flutter.minSdkVersion.toInt()
+        targetSdk = flutter.targetSdkVersion.toInt()
+
+        versionCode = flutter.versionCode.toInt()
         versionName = flutter.versionName
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // Nếu sau này muốn bật lại shrink cho release, xem Cách B.
+        }
+    }
+
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+// Add your extra dependencies here if needed
+dependencies {
+    // implementation("...")
 }

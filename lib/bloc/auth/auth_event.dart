@@ -55,14 +55,12 @@ class ForgotPasswordRequested extends AuthEvent {
 }
 
 class LogoutRequested extends AuthEvent {
-  final String email;
-  const LogoutRequested({
-    required this.email,
-});
+  const LogoutRequested();
 
   @override
-  List<Object> get props => [email];
+  List<Object?> get props => [];
 }
+
 
 class UpdateProfileRequested extends AuthEvent {
   final String? fullName;

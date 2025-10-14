@@ -1,5 +1,8 @@
+import 'package:e_learning/bloc/auth/auth_bloc.dart';
+import 'package:e_learning/bloc/auth/auth_event.dart';
 import 'package:e_learning/view/profile/widgets/profile_option_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/app_dialogs.dart';
 import '../../../routes/app_routes.dart';
@@ -42,8 +45,7 @@ class ProfileOptions extends StatelessWidget {
           onTap: () async {
             final confirm = await AppDialogs.showLogoutDialog();
             if (confirm == true) {
-              // navigate to login page
-              Get.offAllNamed(AppRoutes.login);
+              context.read<AuthBloc>().add(LogoutRequested());
             }
           },
           isDestructive: true,

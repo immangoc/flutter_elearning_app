@@ -2,8 +2,11 @@ import 'package:e_learning/core/theme/app_color.dart';
 import 'package:e_learning/core/utils/app_dialogs.dart';
 import 'package:e_learning/view/teacher/teacher_home/widgets/dashboard_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_event.dart';
 import '../../routes/app_routes.dart';
 
 class TeacherHomeScreen extends StatelessWidget {
@@ -24,7 +27,7 @@ class TeacherHomeScreen extends StatelessWidget {
                 onPressed: () async {
                   final confirm = await AppDialogs.showLogoutDialog();
                   if (confirm == true) {
-                    Get.offAllNamed(AppRoutes.login);
+                    context.read<AuthBloc>().add(LogoutRequested());
                   }
                 },
                 icon: Icon(Icons.logout, color: AppColors.accent),

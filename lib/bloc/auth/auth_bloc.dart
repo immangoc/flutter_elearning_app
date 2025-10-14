@@ -1,9 +1,22 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:e_learning/bloc/auth/auth_event.dart';
 import 'package:e_learning/bloc/auth/auth_state.dart';
+import 'package:get/get.dart';
+import '../../repositories/auth_repository.dart';
+import '../../routes/app_routes.dart';
 
-class AuthBloc extends Bloc<AuthEvent, AuthState>{
-  AuthBloc() : super(const AuthState()) {
+class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final AuthRepository _authRepository;
+  StreamSubscription? _authStateSubscription;
+
+  AuthBloc({AuthRepository? authRepository})
+    : _authRepository = authRepository ?? AuthRepository(),
+      super(const AuthState()) {
+    _authStateSubscription = _authRepository.authStateChanges.listen(
+      (user) => add(AuthStateChanged(user)),
+    );
     on<AuthStateChanged>((_onAuthStateChanged));
     on<RegisterRequested>((_onRegisterRequested));
     on<LoginRequested>((_onLoginRequested));
@@ -11,73 +24,102 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>{
     on<UpdateProfileRequested>((_onUpdateProfileRequested));
     on<ForgotPasswordRequested>((_onForgotPasswordRequested));
   }
+
   Future<void> _onAuthStateChanged(
-      AuthStateChanged event,
-      Emitter<AuthState> emit,
-      )async{
-  // Xử lý sự kiện thay đổi trạng thái xác thực
-    emit(const AuthState());
+    AuthStateChanged event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (event.user != null) {
+      emit(
+        state.copyWith(userModel: event.user, isLoading: false, error: null),
+      );
+    } else {
+      emit(const AuthState());
+    }
   }
 
   Future<void> _onRegisterRequested(
-      RegisterRequested event,
-      Emitter<AuthState> emit,
-      )async{
+    RegisterRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     try {
-      emit(state.copyWith(isLoading: true));
-      // Thực hiện đăng ký người dùng ở đây
-      emit(state.copyWith(isLoading: false));
-    }catch(e){
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      emit(state.copyWith(isLoading: true, error: null));
+      final user = await _authRepository.signUp(
+        email: event.email,
+        password: event.password,
+        fullName: event.fullName,
+        role: event.role,
+      );
+      emit(state.copyWith(userModel: user, isLoading: false, error: null));
+    } catch (e) {
+      emit(
+        state.copyWith(error: e.toString(), isLoading: false, userModel: null),
+      );
     }
   }
 
   Future<void> _onLoginRequested(
-      LoginRequested event,
-      Emitter<AuthState> emit,
-      )async{
+    LoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     try {
-      emit(state.copyWith(isLoading: true));
-      // Thực hiện đăng nhập người dùng ở đây
+      emit(state.copyWith(isLoading: true, error: null));
+      await _authRepository.signIn(
+        email: event.email,
+        password: event.password,
+      );
       emit(state.copyWith(isLoading: false));
-    }catch(e){
+    } catch (e) {
       emit(state.copyWith(error: e.toString(), isLoading: false));
     }
   }
 
   Future<void> _onLogoutRequested(
-      LogoutRequested event,
-      Emitter<AuthState> emit,
-      )async{
+    LogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     try {
-      // Thực hiện đăng xuất người dùng ở đây
+      emit(state.copyWith(isLoading: true));
+      await _authRepository.signOut();
       emit(const AuthState());
-    }catch(e){
-      emit(state.copyWith(error: e.toString()));
+      Get.offAllNamed(AppRoutes.login);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
     }
   }
+
   Future<void> _onUpdateProfileRequested(
-      UpdateProfileRequested event,
-      Emitter<AuthState> emit,
-      )async{
-        try{
-          emit(state.copyWith(isLoading: true));
-          // Thực hiện cập nhật thông tin người dùng ở đây
-          emit(state.copyWith(isLoading: false));
-        }catch(e){
-          emit(state.copyWith(error: e.toString(), isLoading: false));
-        }
+    UpdateProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, error: null));
+      await _authRepository.updateProfile(
+        fullName: event.fullName,
+        photoUrl: event.photoUrl,
+      );
+      emit(state.copyWith(isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
+    }
   }
+
   Future<void> _onForgotPasswordRequested(
-      ForgotPasswordRequested event,
-      Emitter<AuthState> emit,
-      )async{
-        try{
-          emit(state.copyWith(isLoading: true));
-          // Thực hiện quên mật khẩu ở đây
-          emit(state.copyWith(isLoading: false));
-        }catch(e){
-          emit(state.copyWith(error: e.toString(), isLoading: false));
-        }
+    ForgotPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, error: null));
+      await _authRepository.resetPassword(event.email);
+      emit(state.copyWith(isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isLoading: false));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _authStateSubscription?.cancel();
+    return super.close();
   }
 }

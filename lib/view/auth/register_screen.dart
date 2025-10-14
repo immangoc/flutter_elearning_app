@@ -1,8 +1,12 @@
+import 'package:e_learning/bloc/auth/auth_event.dart';
 import 'package:e_learning/core/utils/validators.dart';
 import 'package:e_learning/view/onboarding/widgets/common/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_state.dart';
 import '../../models/user_model.dart';
 import '../../routes/app_routes.dart';
 import '../onboarding/widgets/common/custom_button.dart';
@@ -76,11 +80,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _handleRegister() {
     if (_formKey.currentState!.validate() && _selectedRole != null) {
-      if (_selectedRole == UserRole.teacher) {
-        Get.offAllNamed(AppRoutes.teacherHome);
-      } else {
-        Get.offAllNamed(AppRoutes.main);
-      }
+      context.read<AuthBloc>().add(
+        RegisterRequested(
+          email: _emailController.text,
+          password: _passwordController.text,
+          fullName: _fullNameController.text,
+          role: _selectedRole!,
+        ),
+      );
     } else if (_selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -102,162 +109,195 @@ class _RegisterScreenState extends State<RegisterScreen> {
       roleIcon = Icons.person_outline;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              height: Get.height * 0.3,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withOpacity(0.8),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: const BorderRadius.only(
-                  bottomRight: Radius.circular(100),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 50,
-                    left: 20,
-                    child: IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    ),
-                  ),
-                  const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Create Account',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Start your learning journey',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error!), backgroundColor: Colors.red),
+          );
+        } else if (state.userModel != null) {
+          //navigate based on user role
+          if (state.userModel!.role == UserRole.teacher) {
+            Get.offAllNamed(AppRoutes.teacherHome);
+          } else {
+            Get.offAllNamed(AppRoutes.main);
+          }
+        }
+      },
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Form(
-                key: _formKey,
-                child: Column(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Header
+              Container(
+                height: Get.height * 0.3,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomRight: Radius.circular(100),
+                  ),
+                ),
+                child: Stack(
                   children: [
-                    const SizedBox(height: 20),
-                    CustomTextfield(
-                      label: 'Full Name',
-                      hint: 'Enter your full name',
-                      prefixIcon: Icons.person_outline,
-                      controller: _fullNameController,
-                      validator: FormValidator.validateFullName,
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextfield(
-                      label: 'Email',
-                      hint: 'Enter your email',
-                      prefixIcon: Icons.email_outlined,
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: FormValidator.validateEmail,
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextfield(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      prefixIcon: Icons.lock_outline,
-                      obscureText: true,
-                      controller: _passwordController,
-                      validator: FormValidator.validatePassword,
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextfield(
-                      label: 'Confirm Password',
-                      hint: 'Re-enter your password',
-                      prefixIcon: Icons.lock_outline,
-                      obscureText: true,
-                      controller: _confirmPasswordController,
-                      validator: (value) => FormValidator.validateConfirmPassword(
-                        value,
-                        _passwordController.text,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Role Selector (với icon động)
-                    GestureDetector(
-                      onTap: _selectRole,
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Role',
-                          prefixIcon: Icon(roleIcon),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                        ),
-                        child: Text(
-                          _selectedRole?.toString().split('.').last.capitalize ??
-                              'Select a role',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _selectedRole == null
-                                ? Colors.grey
-                                : Colors.black,
-                          ),
+                    Positioned(
+                      top: 50,
+                      left: 20,
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 30),
-                    CustomButton(
-                      text: 'Register',
-                      onPressed: _handleRegister,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Already have an account?'),
-                        TextButton(
-                          onPressed: () => Get.back(result: AppRoutes.login),
-                          child: Text(
-                            "Login",
+                    const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Create Account',
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor,
+                              color: Colors.white,
+                              fontSize: 30,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
-                    )
+                          SizedBox(height: 10),
+                          Text(
+                            'Start your learning journey',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      CustomTextfield(
+                        label: 'Full Name',
+                        hint: 'Enter your full name',
+                        prefixIcon: Icons.person_outline,
+                        controller: _fullNameController,
+                        validator: FormValidator.validateFullName,
+                      ),
+                      const SizedBox(height: 20),
+                      CustomTextfield(
+                        label: 'Email',
+                        hint: 'Enter your email',
+                        prefixIcon: Icons.email_outlined,
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: FormValidator.validateEmail,
+                      ),
+                      const SizedBox(height: 20),
+                      CustomTextfield(
+                        label: 'Password',
+                        hint: 'Enter your password',
+                        prefixIcon: Icons.lock_outline,
+                        obscureText: true,
+                        controller: _passwordController,
+                        validator: FormValidator.validatePassword,
+                      ),
+                      const SizedBox(height: 20),
+                      CustomTextfield(
+                        label: 'Confirm Password',
+                        hint: 'Re-enter your password',
+                        prefixIcon: Icons.lock_outline,
+                        obscureText: true,
+                        controller: _confirmPasswordController,
+                        validator: (value) =>
+                            FormValidator.validateConfirmPassword(
+                              value,
+                              _passwordController.text,
+                            ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Role Selector (với icon động)
+                      GestureDetector(
+                        onTap: _selectRole,
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Role',
+                            prefixIcon: Icon(roleIcon),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            _selectedRole
+                                    ?.toString()
+                                    .split('.')
+                                    .last
+                                    .capitalize ??
+                                'Select a role',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: _selectedRole == null
+                                  ? Colors.grey
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          return CustomButton(
+                            text: 'Register',
+                            onPressed: _handleRegister,
+                            isLoading: state.isLoading,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Already have an account?'),
+                          TextButton(
+                            onPressed: () => Get.back(result: AppRoutes.login),
+                            child: Text(
+                              "Login",
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
