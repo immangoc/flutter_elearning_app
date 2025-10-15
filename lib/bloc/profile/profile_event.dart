@@ -27,7 +27,7 @@ class UpdateProfileRequested extends ProfileEvent {
 }
 
 class UpdateProfilePhotoRequested extends ProfileEvent {
-  final String? photoPath;
+  final String photoPath;
 
   const UpdateProfilePhotoRequested(this.photoPath);
 

@@ -97,6 +97,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _authRepository.updateProfile(
         fullName: event.fullName,
         photoUrl: event.photoUrl,
+        phoneNumber: event.phoneNumber,
+        bio: event.bio,
       );
       emit(state.copyWith(isLoading: false));
     } catch (e) {

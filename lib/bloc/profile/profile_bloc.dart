@@ -5,6 +5,7 @@ import 'package:e_learning/bloc/auth/auth_state.dart';
 import 'package:e_learning/bloc/profile/profile_event.dart';
 import 'package:e_learning/bloc/profile/profile_state.dart';
 import 'package:e_learning/models/profile_model.dart';
+import 'package:e_learning/services/cloudinary_service.dart';
 
 import '../../repositories/auth_repository.dart';
 import '../auth/auth_bloc.dart';
@@ -13,24 +14,29 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final AuthBloc _authBloc;
   final AuthRepository _authRepository;
   late final StreamSubscription<AuthState> _authSubscription;
+  final CloudinaryService _cloudinaryService;
 
-  ProfileBloc({required AuthBloc authBloc, AuthRepository? authRepository})
-    : _authBloc = authBloc,
-      _authRepository = authRepository ?? AuthRepository(),
-      super(const ProfileState()) {
+  ProfileBloc({
+    required AuthBloc authBloc,
+    AuthRepository? authRepository,
+    CloudinaryService? cloudinaryService,
+  }) : _authBloc = authBloc,
+       _authRepository = authRepository ?? AuthRepository(),
+       _cloudinaryService = cloudinaryService ?? CloudinaryService(),
+       super(const ProfileState()) {
     on<LoadProfile>(_onLoadProfile);
     on<UpdateProfileRequested>(_onUpdateProfileRequested);
     on<UpdateProfilePhotoRequested>(_onUpdateProfilePhotoRequested);
 
     //load profile when aut state changes
     _authSubscription = _authBloc.stream.listen((authState) {
-      if(authState.userModel != null) {
+      if (authState.userModel != null) {
         add(LoadProfile());
       }
     });
 
     //initial load if user is already logged in
-    if(_authBloc.state.userModel != null) {
+    if (_authBloc.state.userModel != null) {
       add(LoadProfile());
     }
   }
@@ -66,7 +72,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     try {
-      emit(state.copyWith(isLoading: true));
+      emit(state.copyWith(isPhotoUploading: true));
 
       await _authRepository.updateProfile(
         fullName: event.fullName,
@@ -89,14 +95,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-
   Future<void> _onUpdateProfilePhotoRequested(
-      UpdateProfilePhotoRequested event,
-      Emitter<ProfileState> emit,
-      )async {
+    UpdateProfilePhotoRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
     try {
       emit(state.copyWith(isLoading: true));
-    }catch (e) {}
+      //upload to cloudinary
+      final photoUrl = await _cloudinaryService.uploadImage(event.photoPath);
+
+      //update profile with new photo url
+      add(UpdateProfileRequested(photoUrl: photoUrl));
+
+      emit(state.copyWith(isPhotoUploading: false));
+
+    } catch (e) {
+      emit(state.copyWith(error: e.toString(), isPhotoUploading: false));
+    }
   }
 
   @override

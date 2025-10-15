@@ -1,4 +1,5 @@
 import 'package:e_learning/bloc/profile/profile_bloc.dart';
+import 'package:e_learning/bloc/profile/profile_event.dart';
 import 'package:e_learning/view/onboarding/widgets/common/custom_button.dart';
 import 'package:e_learning/view/onboarding/widgets/common/custom_textfield.dart';
 import 'package:e_learning/view/profile/widgets/edit_profile_app_bar.dart';
@@ -35,6 +36,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  void _handleSave() {
+    if (_formKey.currentState!.validate()) {
+      context.read<ProfileBloc>().add(
+        UpdateProfileRequested(
+          fullName: _fullNameController.text.trim(),
+          phoneNumber: _phoneController.text.trim(),
+          bio: _bioController.text.trim(),
+        ),
+      );
+
+      //wait for the update to complete before navigation back
+      context
+          .read<ProfileBloc>()
+          .stream
+          .firstWhere((state) => !state.isLoading)
+          .then((_) => Get.back());
+    }
+  }
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -52,11 +72,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (profile == null) return const Scaffold();
 
         return Scaffold(
-          appBar: EditProfileAppBar(
-            onSave: () {
-              Get.back();
-            },
-          ),
+          appBar: EditProfileAppBar(onSave: _handleSave),
           body: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -274,10 +290,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         //save Button
                         CustomButton(
                           text: 'Save Changes',
-                          onPressed: () {
-                            Get.back();
-                          },
+                          onPressed: _handleSave,
                           icon: Icons.check_circle_outline,
+                          isLoading: state.isLoading,
                         ),
                       ],
                     ),
