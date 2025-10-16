@@ -100,9 +100,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     try {
-      emit(state.copyWith(isLoading: true));
+      emit(state.copyWith(isPhotoUploading: true));
       //upload to cloudinary
-      final photoUrl = await _cloudinaryService.uploadImage(event.photoPath);
+      final photoUrl = await _cloudinaryService.uploadImage(event.photoPath, 'profile_pictures');
 
       //update profile with new photo url
       add(UpdateProfileRequested(photoUrl: photoUrl));
