@@ -34,3 +34,9 @@ class UpdateCourse extends CourseEvent {
 
   UpdateCourse(this.instructorID);
 }
+
+class DeleteCourse extends CourseEvent {
+  final String courseId;
+
+  DeleteCourse(this.courseId);
+}

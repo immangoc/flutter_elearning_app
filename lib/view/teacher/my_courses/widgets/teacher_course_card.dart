@@ -1,14 +1,44 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_learning/bloc/course/course_bloc.dart';
+import 'package:e_learning/bloc/course/course_event.dart';
 import 'package:e_learning/core/theme/app_color.dart';
 import 'package:e_learning/models/course.dart';
 import 'package:e_learning/view/teacher/create_course/create_course_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 
 class TeacherCourseCard extends StatelessWidget {
   final Course course;
   const TeacherCourseCard({super.key, required this.course});
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Course'),
+        content: const Text('Are you sure you want to delete this course?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<CourseBloc>().add(DeleteCourse(course.id));
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -137,12 +167,26 @@ class TeacherCourseCard extends StatelessWidget {
                             color: AppColors.primary,
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () {
-                            //navigate to course edit page
-                          },
-                          icon: const Icon(Icons.edit),
-                          label: const Text("Edit"),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () {
+                                Get.to(
+                                  () => CreateCourseScreen(course: course),
+                                );
+                              },
+                              icon: const Icon(Icons.edit),
+                              label: const Text("Edit"),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => _showDeleteConfirmation(context),
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              label: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.red)
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

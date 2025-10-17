@@ -20,6 +20,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<LoadEnrolledCourses>(_onLoadEnrolledCourses);
     on<LoadOfflineCourses>(_onLoadOfflineCourses);
     on<UpdateCourse>(_onUpdateCourse);
+    on<DeleteCourse>(_onDeleteCourse);
   }
 
   Future<void> _onLoadCourses(
@@ -67,6 +68,25 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         event.instructorID,
       );
       emit(CourseLoaded(courses));
+    } catch (e) {
+      emit(CourseError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteCourse(
+    DeleteCourse event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      await _courseRepository.deleteCourse(event.courseId);
+      final userId = _authBloc.state.userModel?.uid;
+      if (userId != null) {
+        final courses = await _courseRepository.getInstructorCourses(userId);
+        //first emit the success message
+        emit(CourseDeleted('Course deleted successfully'));
+        //then emit the updated course list
+        emit(CourseLoaded(courses));
+      }
     } catch (e) {
       emit(CourseError(e.toString()));
     }

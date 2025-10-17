@@ -30,3 +30,8 @@ class OfflineCoursesLoaded extends CourseState {
   final List<Course> courses;
   OfflineCoursesLoaded(this.courses);
 }
+
+class CourseDeleted extends CourseState {
+  final String message;
+  CourseDeleted(this.message);
+}

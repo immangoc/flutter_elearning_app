@@ -1,7 +1,6 @@
 import 'package:e_learning/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../models/course.dart';
 
 class CreateCourseAppBar extends StatelessWidget {
@@ -24,25 +23,33 @@ class CreateCourseAppBar extends StatelessWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: ElevatedButton(
-            onPressed: onSubmit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              )
-            ),
-            child: Text(
-              course != null ? 'Update' : 'Create',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Center(
+            child: ElevatedButton.icon(
+              onPressed: onSubmit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.primary,
+                elevation: 5,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              icon: Icon(
+                course != null ? Icons.update_outlined : Icons.add_circle_outline,
+                size: 20,
+              ),
+              label: Text(
+                course != null ? 'Update' : 'Create',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
       ],
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: EdgeInsets.only(
