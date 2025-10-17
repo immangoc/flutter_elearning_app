@@ -1,126 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:get/get.dart';
 
 import '../../../core/theme/app_color.dart';
-import '../../../routes/app_routes.dart';
 
 class RecommendedCourseCard extends StatelessWidget {
   final String courseId;
   final String title;
   final String imageUrl;
-  final String instructorID;
-  final String duration;
+  final String instructorName;
   final bool isPremium;
+  final double rating;
+  final int reviewCount;
+  final double price;
+  final VoidCallback onTap;
 
   const RecommendedCourseCard({
     super.key,
     required this.courseId,
     required this.title,
     required this.imageUrl,
-    required this.instructorID,
-    required this.duration,
-    required this.isPremium,
+    required this.instructorName,
+    this.isPremium = false,
+    required this.rating,
+    required this.reviewCount,
+    required this.price,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 16, bottom: 5),
-      decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 240,
+        margin: const EdgeInsets.only(right: 16, bottom: 5),
+        decoration: BoxDecoration(
+          color: AppColors.accent,
           borderRadius: BorderRadius.circular(16),
-          onTap: () => Get.toNamed(
-            AppRoutes.courseDetail.replaceAll(':id', courseId),
-            arguments: courseId,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      height: 90,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: AppColors.primary.withOpacity(0.1),
-                        highlightColor: AppColors.accent,
-                        child: Container(
-                          height: 90,
-                          width: double.infinity,
-                          color: Colors.white,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        height: 90,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: AppColors.primary.withValues(alpha: 0.1),
+                      highlightColor: AppColors.accent,
+                      child: Container(
+                        height: 140,
                         width: double.infinity,
-                        color: AppColors.primary.withOpacity(0.1),
-                        child: const Icon(Icons.error),
+                        color: Colors.white,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      child: const Icon(Icons.error),
+                    ),
+                  ),
+                ),
+                if (isPremium)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star, color: Colors.white, size: 12),
+                          const SizedBox(width: 2),
+
+                          Text(
+                            'PRO',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  if (isPremium)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.star, color: Colors.white, size: 12),
-                            const SizedBox(width: 2),
-
-                            Text(
-                              'PRO',
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              Padding(
-                  padding: const EdgeInsets.all(12),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                       ),
@@ -137,25 +134,48 @@ class RecommendedCourseCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Instructor $instructorID',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppColors.secondary,
-                          ),
+                          instructorName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.secondary),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          rating.toStringAsFixed(1),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.secondary),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '($reviewCount)',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.secondary),
+                        ),
+                      ],
+                    ),
                     Text(
-                      duration,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.secondary,
+                      '\$${price.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

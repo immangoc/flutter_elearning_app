@@ -4,6 +4,27 @@ import 'package:e_learning/models/course.dart';
 class CourseRepository {
   final _firestore = FirebaseFirestore.instance;
 
+  Future<List<Course>> getCourse({String? categoryID}) async {
+    try {
+      Query query = _firestore.collection('courses');
+
+      if (categoryID != null) {
+        query = query.where('categoryID', isEqualTo: categoryID);
+      }
+
+      final snapshot = await query.get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data == null) {
+          throw Exception('Course data is null');
+        }
+        return Course.fromJson({...data, 'id': doc.id});
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch courses: $e');
+    }
+  }
+
   Future<void> createCourse(Course course) async {
     try {
       // convert course to JSON
@@ -47,21 +68,21 @@ class CourseRepository {
       final courseData = course.toJson();
 
       // convert lesson to JSON
-      final lessonsData = course.lessons.map((lesson) => lesson.toJson()).toList();
+      final lessonsData = course.lessons
+          .map((lesson) => lesson.toJson())
+          .toList();
 
       // update course document
       await _firestore.collection('courses').doc(course.id).update({
         ...courseData,
         'lessons': lessonsData,
       });
-
-
-    }catch (e) {
+    } catch (e) {
       throw Exception('Failed to update course: $e');
     }
   }
 
-  // delete course
+// delete course
   Future<void> deleteCourse(String courseId) async {
     try {
       // delete the course document
@@ -80,5 +101,4 @@ class CourseRepository {
       throw Exception('Failed to delete course: $e');
     }
   }
-
 }

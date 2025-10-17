@@ -80,14 +80,11 @@ class HomeScreen extends StatelessWidget {
             delegate: SliverChildListDelegate([
               const SearchBarWidget(),
               const SizedBox(height: 32),
-              CategorySection(
-                  categories: categories
-              ),
+              CategorySection(categories: categories),
               const SizedBox(height: 32),
               const InProgressSection(),
               RecommendedSection(),
-            ],
-            ),
+            ]),
           ),
         ),
       ],
