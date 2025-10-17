@@ -47,7 +47,7 @@ class Course {
     imageUrl: json['imageUrl'],
     instructorID: json['instructorID'],
     categoryID: json['categoryID'],
-    price: json['categoryID'].toDouble(),
+    price: json['price'].toDouble(),
     lessons: (json['lessons'] as List)
         .map((lesson) => Lesson.fromJson(lesson))
         .toList(),

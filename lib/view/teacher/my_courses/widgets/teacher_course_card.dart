@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_learning/core/theme/app_color.dart';
 import 'package:e_learning/models/course.dart';
+import 'package:e_learning/view/teacher/create_course/create_course_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:get/get.dart';
 
 class TeacherCourseCard extends StatelessWidget {
   final Course course;
@@ -26,7 +28,9 @@ class TeacherCourseCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            Get.to(() => CreateCourseScreen(course: course));
+          },
           borderRadius: BorderRadius.circular(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +143,7 @@ class TeacherCourseCard extends StatelessWidget {
                           },
                           icon: const Icon(Icons.edit),
                           label: const Text("Edit"),
-                        )
+                        ),
                       ],
                     ),
                   ],

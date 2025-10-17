@@ -2,9 +2,13 @@ import 'package:e_learning/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../models/course.dart';
+
 class CreateCourseAppBar extends StatelessWidget {
   final VoidCallback onSubmit;
-  const CreateCourseAppBar({super.key, required this.onSubmit});
+  final Course? course;
+
+  const CreateCourseAppBar({super.key, required this.onSubmit, this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +23,24 @@ class CreateCourseAppBar extends StatelessWidget {
         icon: Icon(Icons.arrow_back, color: AppColors.accent),
       ),
       actions: [
-        TextButton(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: ElevatedButton(
             onPressed: onSubmit,
-            child: const Text(
-                'Create',
-              style: TextStyle(
-                color: AppColors.accent,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              )
+            ),
+            child: Text(
+              course != null ? 'Update' : 'Create',
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ),
         ),
         const SizedBox(width: 8),
       ],
@@ -37,7 +50,7 @@ class CreateCourseAppBar extends StatelessWidget {
           bottom: 16,
         ),
         title: Text(
-            'Create New Course',
+          course != null ? 'Edit Course' : 'Create Course',
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(
             color: AppColors.accent,
             fontWeight: FontWeight.bold,
@@ -46,10 +59,7 @@ class CreateCourseAppBar extends StatelessWidget {
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                AppColors.primary,
-                AppColors.primaryLight,
-              ],
+              colors: [AppColors.primary, AppColors.primaryLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
