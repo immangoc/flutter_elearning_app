@@ -11,10 +11,23 @@ class CourseError extends CourseState {
   CourseError(this.message);
 }
 
-class CourseLoaded extends CourseState {
+class CoursesLoaded extends CourseState {
   final List<Course> courses;
-  CourseLoaded(this.courses);
+  final Course? selectedCourse;
+
+  CoursesLoaded(this.courses, {this.selectedCourse});
+
+  CoursesLoaded copyWith({
+    List<Course>? courses,
+    Course? selectedCourse,
+  }) {
+    return CoursesLoaded(
+      courses ?? this.courses,
+      selectedCourse: selectedCourse ?? this.selectedCourse,
+    );
+  }
 }
+
 
 class CourseDetailLoaded extends CourseState {
   final Course course;

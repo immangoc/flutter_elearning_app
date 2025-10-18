@@ -31,7 +31,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     emit(CourseLoading());
     try {
       final courses = await _courseRepository.getCourse();
-      emit(CourseLoaded(courses));
+      emit(CoursesLoaded(courses));
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -41,10 +41,23 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     LoadCourseDetail event,
     Emitter<CourseState> emit,
   ) async {
-    emit(CourseLoading());
+    //first emit loading state
+    if(state is CoursesLoaded) {
+      final currentState = state as CoursesLoaded;
+      emit(CoursesLoaded(currentState.courses, selectedCourse: null));
+    } else {
+      emit(CourseLoading());
+    }
+
     try {
       final course = await _courseRepository.getCourseDetail(event.courseId);
-      emit(CourseDetailLoaded(course));
+
+      //if we already have courses loaded, update the selected course
+      if(state is CoursesLoaded) {
+        final courses =  await _courseRepository.getCourse();
+        emit(CoursesLoaded(courses, selectedCourse: course));
+      }
+
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -95,7 +108,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       final courses = await _courseRepository.getInstructorCourses(
         event.instructorID,
       );
-      emit(CourseLoaded(courses));
+      emit(CoursesLoaded(courses));
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -113,7 +126,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         //first emit the success message
         emit(CourseDeleted('Course deleted successfully'));
         //then emit the updated course list
-        emit(CourseLoaded(courses));
+        emit(CoursesLoaded(courses));
       }
     } catch (e) {
       emit(CourseError(e.toString()));

@@ -76,7 +76,7 @@ class _MyCoursesScreenState extends State<MyCoursesScreen> {
           );
         } else if (state is CourseError) {
           return Center(child: Text('Error: ${state.message}'));
-        } else if (state is CourseLoaded) {
+        } else if (state is CoursesLoaded) {
           final teacherCourses = state.courses;
           if (teacherCourses.isEmpty) {
             return Scaffold(

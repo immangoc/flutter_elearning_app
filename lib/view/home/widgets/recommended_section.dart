@@ -6,6 +6,7 @@ import 'package:e_learning/models/user_model.dart';
 import 'package:e_learning/repositories/instructor_repository.dart';
 import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/view/home/widgets/recommended_course_card.dart';
+import 'package:e_learning/view/home/widgets/shimmer_recommended_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -47,16 +48,16 @@ class _RecommendedSectionState extends State<RecommendedSection> {
 
     return BlocConsumer<CourseBloc, CourseState>(
       listener: (context, state) {
-        if (state is CourseLoaded) {
+        if (state is CoursesLoaded) {
           _loadInstructors(state.courses);
         }
       },
       builder: (context, state) {
         if (state is CourseLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return ShimmerRecommendedSection();
         }
 
-        if (state is CourseLoaded) {
+        if (state is CoursesLoaded) {
           final courses = state.courses;
 
           if (courses.isEmpty) {

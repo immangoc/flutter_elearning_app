@@ -5,6 +5,7 @@ import 'package:e_learning/view/home/widgets/in_progress_section.dart';
 import 'package:e_learning/view/home/widgets/recommended_section.dart';
 import 'package:e_learning/view/home/widgets/search_bar_widget.dart';
 import 'package:e_learning/models/category.dart';
+import 'package:e_learning/view/home/widgets/shimmer_category_section.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -39,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -53,8 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SearchBarWidget(),
               const SizedBox(height: 32),
               _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : CategorySection(categories: _categories),
+                  ? const ShimmerCategorySection()
+                  : CategorySection(categories: _categories),
               const SizedBox(height: 32),
               const InProgressSection(),
               RecommendedSection(),

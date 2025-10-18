@@ -110,11 +110,11 @@ class _CourseListScreenState extends State<CourseListScreen> {
                     ),
                   ),
                 )
-              else if (state is CourseLoaded && state.courses.isEmpty)
+              else if (state is CoursesLoaded && state.courses.isEmpty)
                 SliverFillRemaining(
                   child: EmptyStateWidget(onActionPressed: () => Get.back()),
                 )
-              else if (state is CourseLoaded)
+              else if (state is CoursesLoaded)
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverList(
