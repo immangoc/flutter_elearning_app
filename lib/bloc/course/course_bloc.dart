@@ -16,6 +16,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
        super(CourseInitial()) {
     on<LoadCourses>(_onLoadCourses);
     on<LoadCourseDetail>(_onLoadCourseDetail);
+    on<RefreshCoursesDetail>(_onRefreshCoursesDetail);
     on<EnrollCourse>(_onEnrollCourse);
     on<LoadEnrolledCourses>(_onLoadEnrolledCourses);
     on<LoadOfflineCourses>(_onLoadOfflineCourses);
@@ -40,8 +41,29 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     LoadCourseDetail event,
     Emitter<CourseState> emit,
   ) async {
-    //implement latter
+    emit(CourseLoading());
+    try {
+      final course = await _courseRepository.getCourseDetail(event.courseId);
+      emit(CourseDetailLoaded(course));
+    } catch (e) {
+      emit(CourseError(e.toString()));
+    }
   }
+
+  Future<void> _onRefreshCoursesDetail(
+    RefreshCoursesDetail event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      if (state is CourseDetailLoaded) {
+        final course = await _courseRepository.getCourseDetail(event.courseId);
+        emit(CourseDetailLoaded(course));
+      }
+    }catch (e) {
+      //emit error state if needed
+    }
+  }
+
 
   Future<void> _onEnrollCourse(
     EnrollCourse event,

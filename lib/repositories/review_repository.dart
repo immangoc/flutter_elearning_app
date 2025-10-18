@@ -6,47 +6,101 @@ class ReviewRepository {
 
   Future<List<Review>> getCourseReviews(String courseId) async {
     try {
-      //check if the collection exists
-      final collectionRef = _firestore.collection('reviews');
-      final collectionSnapshot = await collectionRef.limit(1).get();
-
-      if (collectionSnapshot.docs.isEmpty) {
-        //collection does not exist, return empty list
+      //first check if the document exists to avoid query errors
+      final courseDoc = await _firestore
+          .collection('courses')
+          .doc(courseId)
+          .get();
+      if (!courseDoc.exists) {
         return [];
       }
-      final snapshot = await collectionRef
+
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('reviews')
           .where('courseId', isEqualTo: courseId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>?;
-        if (data == null) {
-          throw Exception('Review data is null');
-        }
+      final reviews = snapshot.docs.map((doc) {
+        final data = doc.data();
 
-        return Review.fromJson({'id': doc.id, ...data});
+        //add the document ID to the data map
+        final reviewData = {'id': doc.id, ...data};
+        return Review.fromJson(reviewData);
       }).toList();
+      return reviews;
     } catch (e) {
-      //if there is no reviews, return empty list
       return [];
     }
   }
 
   Future<void> addReview(Review review) async {
     try {
-      await _firestore.collection('reviews').add(review.toJson());
+      final docRef = _firestore.collection('reviews').doc();
+      //create a new review with the generated ID
+      final reviewWithId = Review(
+        id: docRef.id,
+        courseId: review.courseId,
+        userId: review.userId,
+        userName: review.userName,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+      );
+      //convert to json and save
+      final reviewData = reviewWithId.toJson();
+      //set the document data without the id field
+      final dataToSave = Map<String, dynamic>.from(reviewData)..remove('id');
+      await docRef.set(dataToSave);
+      //update course rating and review count
+      await _updateCourseRating(review.courseId);
     } catch (e) {
       throw Exception('Failed to add review: $e');
     }
   }
 
+  Future<void> _updateCourseRating(String courseId) async {
+    try {
+      // get all reviews for the course
+      final reviews = await getCourseReviews(courseId);
+
+      if (reviews.isEmpty) {
+        // if no reviews, set rating to 0 and count to 0
+        await _firestore.collection('courses').doc(courseId).update({
+          'rating': 0.0,
+          'reviewCount': 0,
+        });
+        return;
+      }
+
+      // calculate average rating
+      double totalRating = 0;
+      for (var review in reviews) {
+        totalRating += review.rating;
+      }
+
+      final averageRating = totalRating / reviews.length;
+
+      await _firestore.collection('courses').doc(courseId).update({
+        'rating': averageRating,
+        'reviewCount': reviews.length,
+      });
+    } catch (e) {}
+  }
+
   Future<void> updateReview(Review review) async {
     try {
+      // convert to JSON and save
+      final reviewData = review.toJson();
+
+      // remove id field before updating
+      final dataToUpdate = Map<String, dynamic>.from(reviewData)..remove('id');
       await _firestore
           .collection('reviews')
           .doc(review.id)
-          .update(review.toJson());
+          .update(dataToUpdate);
+
+      // update course rating
+      await _updateCourseRating(review.courseId);
     } catch (e) {
       throw Exception('Failed to update review: $e');
     }
@@ -54,7 +108,20 @@ class ReviewRepository {
 
   Future<void> deleteReview(String reviewId) async {
     try {
+      // get the review first to get the courseId
+      final reviewDoc = await _firestore
+          .collection('reviews')
+          .doc(reviewId)
+          .get();
+      final courseId = reviewDoc.data()?['courseId'] as String;
+
+      // delete the review
       await _firestore.collection('reviews').doc(reviewId).delete();
+
+      // update course rating if we have the courseId
+      if (courseId != null) {
+        await _updateCourseRating(courseId);
+      }
     } catch (e) {
       throw Exception('Failed to delete review: $e');
     }

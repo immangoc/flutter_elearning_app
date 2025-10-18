@@ -1,11 +1,13 @@
+import 'package:e_learning/models/review.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_color.dart';
 
 class ReviewDialog extends StatefulWidget {
   final String courseId;
+  final Review? existingReview;
 
-  const ReviewDialog({super.key, required this.courseId});
+  const ReviewDialog({super.key, required this.courseId, this.existingReview});
 
   @override
   State<ReviewDialog> createState() => _ReviewDialogState();
@@ -13,7 +15,48 @@ class ReviewDialog extends StatefulWidget {
 
 class _ReviewDialogState extends State<ReviewDialog> {
   double _rating = 0;
-  final _reviewController = TextEditingController();
+  late final TextEditingController _reviewController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rating = widget.existingReview?.rating ?? 0;
+    _reviewController = TextEditingController(
+      text: widget.existingReview?.comment ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
+
+  void _resetForm() {
+    setState(() {
+      _rating = 0;
+      _reviewController.clear();
+    });
+  }
+
+  void _handleSubmit() {
+    if (_rating > 0) {
+      final result = {
+        'action': widget.existingReview != null ? 'update' : 'add',
+        'rating': _rating,
+        'review': _reviewController.text,
+      };
+      _resetForm();
+      Get.back(result: result);
+    }
+  }
+
+  void _handleDelete() {
+    final result = {'action': 'delete'};
+    _resetForm();
+    Get.back(result: result);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -26,7 +69,7 @@ class _ReviewDialogState extends State<ReviewDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Rate & Review',
+              widget.existingReview != null ? 'Edit Review' : 'Rate & Review',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -65,9 +108,22 @@ class _ReviewDialogState extends State<ReviewDialog> {
             const SizedBox(height: 6),
             Row(
               children: [
+                if(widget.existingReview != null)
+                  TextButton(
+                    onPressed: _handleDelete,
+                    child: Text(
+                      'Delete',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
                 Expanded(
                   child: TextButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () {
+                      _resetForm();
+                      Get.back();
+                    },
                     child: Text(
                       'Cancel',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -80,14 +136,7 @@ class _ReviewDialogState extends State<ReviewDialog> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _rating > 0
-                        ? () {
-                            Get.back(
-                              result: {
-                                'rating': _rating,
-                                'review': _reviewController.text,
-                              },
-                            );
-                          }
+                        ? _handleSubmit
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -97,7 +146,7 @@ class _ReviewDialogState extends State<ReviewDialog> {
                       ),
                     ),
                     child: Text(
-                      'Submit',
+                      widget.existingReview != null ? 'Update' : 'Submit',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),

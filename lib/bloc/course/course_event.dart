@@ -13,6 +13,12 @@ class LoadCourseDetail extends CourseEvent {
   LoadCourseDetail(this.courseId);
 }
 
+class RefreshCoursesDetail extends CourseEvent {
+  final String courseId;
+
+  RefreshCoursesDetail(this.courseId);
+}
+
 class EnrollCourse extends CourseEvent {
   final String courseId;
 

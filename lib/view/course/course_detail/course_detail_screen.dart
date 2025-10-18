@@ -1,5 +1,6 @@
-import 'package:e_learning/models/course.dart';
-import 'package:e_learning/repositories/course_repository.dart';
+import 'package:e_learning/bloc/course/course_bloc.dart';
+import 'package:e_learning/bloc/course/course_event.dart';
+import 'package:e_learning/bloc/course/course_state.dart';
 import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/view/course/course_detail/widgets/action_buttons.dart';
 import 'package:e_learning/view/course/course_detail/widgets/course_detail_app_bar.dart';
@@ -7,6 +8,7 @@ import 'package:e_learning/view/course/course_detail/widgets/course_info_card.da
 import 'package:e_learning/view/course/course_detail/widgets/lesson_list.dart';
 import 'package:e_learning/view/course/course_detail/widgets/reviews_section.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_color.dart';
@@ -21,38 +23,14 @@ class CourseDetailScreen extends StatefulWidget {
 }
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
-
-  final CourseRepository _courseRepository = CourseRepository();
-  Course? _course;
-  bool _isLoading = true;
   bool _isUnlocked = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCourse();
+    context.read<CourseBloc>().add(LoadCourseDetail(widget.courseId));
   }
 
-  Future<void> _loadCourse() async {
-    try{
-      final course = await _courseRepository.getCourseDetail(widget.courseId);
-      setState(() {
-        _course = course;
-        _isLoading = false;
-      });
-    }catch(e) {
-      setState(() {
-        _isLoading = false;
-      });
-      Get.snackbar(
-        'Error',
-        'Failed to load course details: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-    }
-  }
 
 
 
@@ -61,103 +39,106 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final theme = Theme.of(context);
     final lastLesson = Get.parameters['lastLesson'] ?? '';
 
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
 
-    if(_course == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Center(
-          child: Text('Course not found'),
-        ),
-      );
-    }
-
-    //if coming from in-progress, scroll to last lesson
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      if(lastLesson != null){
-        //implement scroll to last lesson logic here
-      }
-    });
-    
-    
-
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          CourseDetailAppBar(imageUrl: _course!.imageUrl),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _course!.title,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        _course!.rating.toString(),
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(${_course!.reviewCount} reviews)',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '\$${_course!.price}',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(_course!.description, style: theme.textTheme.bodyLarge),
-                  const SizedBox(height: 16),
-                  CourseInfoCard(course: _course!),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Course Content',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  LessonList(
-                    courseId: widget.courseId,
-                    isUnlocked: _isUnlocked,
-                    onLessonComplete: () => setState(() {}),
-                  ),
-                  const SizedBox(height: 24),
-                  ReviewsSection(courseId: widget.courseId),
-                  const SizedBox(height: 16),
-                  ActionButtons(course: _course!,isUnlocked: _isUnlocked,),
-                ],
-              ),
+    return BlocBuilder<CourseBloc, CourseState>(
+      builder: (context, state) {
+        if(state is CourseLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: _course!.isPremium && !_isUnlocked
-          ? Container(
+          );
+        }
+
+        if(state is CourseError) {
+          return Scaffold(
+            body: Center(
+              child: Text(state.message),
+            ),
+          );
+        }
+
+        if(state is CourseDetailLoaded) {
+          final course = state.course;
+          //if coming from in-progress, scroll to last lesson
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (lastLesson != null) {
+              //implement scroll to last lesson logic here
+            }
+          });
+          return Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                CourseDetailAppBar(imageUrl: course.imageUrl),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          course.title,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              course.rating.toString(),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '(${course.reviewCount} reviews)',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '\$${course.price}',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(course.description,
+                            style: theme.textTheme.bodyLarge),
+                        const SizedBox(height: 16),
+                        CourseInfoCard(course: course),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Course Content',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        LessonList(
+                          courseId: widget.courseId,
+                          isUnlocked: _isUnlocked,
+                          onLessonComplete: () => setState(() {}),
+                        ),
+                        const SizedBox(height: 24),
+                        ReviewsSection(courseId: widget.courseId),
+                        const SizedBox(height: 16),
+                        ActionButtons(
+                          course: course, isUnlocked: _isUnlocked,),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            bottomNavigationBar: course.isPremium && !_isUnlocked
+                ? Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
@@ -176,8 +157,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     AppRoutes.payment,
                     arguments: {
                       'courseId': widget.courseId,
-                      'courseName': _course!.title,
-                      'price': _course!.price,
+                      'courseName': course.title,
+                      'price': course.price,
                     },
                   );
                 },
@@ -185,10 +166,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.all(16),
                 ),
-                child: Text('Buy now for \$${_course!.price}'),
+                child: Text('Buy now for \$${course.price}'),
               ),
             )
-          : null,
+                : null,
+          );
+        }
+        return Scaffold(
+          body: Center(
+            child: Text(
+              'Something went wrong!',
+            ),
+          ),
+        );
+      }
     );
   }
 }
