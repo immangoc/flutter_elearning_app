@@ -25,6 +25,22 @@ class CourseRepository {
     }
   }
 
+  Future<Course> getCourseDetail(String courseId) async {
+    try {
+      final doc = await _firestore.collection('courses').doc(courseId).get();
+      if (!doc.exists) {
+        throw Exception('Course not found');
+      }
+      final data = doc.data() as Map<String, dynamic>?;
+      if (data == null) {
+        throw Exception('Course data is null');
+      }
+      return Course.fromJson({...data, 'id': doc.id});
+    } catch (e) {
+      throw Exception('Failed to get course detail: $e');
+    }
+  }
+
   Future<void> createCourse(Course course) async {
     try {
       // convert course to JSON
@@ -82,7 +98,7 @@ class CourseRepository {
     }
   }
 
-// delete course
+  // delete course
   Future<void> deleteCourse(String courseId) async {
     try {
       // delete the course document
@@ -99,6 +115,22 @@ class CourseRepository {
       }
     } catch (e) {
       throw Exception('Failed to delete course: $e');
+    }
+  }
+
+  Future<Set<String>> getCompletedLessons(String courseId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('lesson_progress')
+          .where('courseId', isEqualTo: courseId)
+          .where('isCompleted', isEqualTo: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => doc.data()['lessonId'] as String)
+          .toSet();
+    } catch (e) {
+      throw Exception('Failed to get completed lessons: $e');
     }
   }
 }

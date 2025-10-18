@@ -1,11 +1,40 @@
 import 'package:e_learning/core/theme/app_color.dart';
-import 'package:e_learning/view/course/course_detail/widgets/review_dialog.dart';
+import 'package:e_learning/models/review.dart';
+import 'package:e_learning/repositories/review_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-class ReviewsSection extends StatelessWidget {
+class ReviewsSection extends StatefulWidget {
   final String courseId;
   const ReviewsSection({super.key, required this.courseId});
+
+  @override
+  State<ReviewsSection> createState() => _ReviewsSectionState();
+}
+
+class _ReviewsSectionState extends State<ReviewsSection> {
+  final ReviewRepository _reviewRepository = ReviewRepository();
+  List<Review> _reviews = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    try {
+      final reviews = await _reviewRepository.getCourseReviews(widget.courseId);
+      setState(() {
+        _reviews = reviews;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +53,7 @@ class ReviewsSection extends StatelessWidget {
             ),
             TextButton.icon(
               onPressed: () async {
-                final result = await Get.dialog<Map<String, dynamic>>(
-                  ReviewDialog(courseId: courseId),
-                );
-                if (result != null) {
-                  Get.snackbar(
-                    'Success',
-                    'Thank you for your review!',
-                    backgroundColor: AppColors.primary,
-                    colorText: Colors.white,
-                  );
-                }
+                //implement latter
               },
               label: const Text('Write a review'),
               icon: const Icon(Icons.rate_review),
@@ -42,22 +61,68 @@ class ReviewsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            return _buildReviewTile(
-              context,
-              name: 'User ${index + 1}',
-              rating: 4.5,
-              comment: 'Great course! Very information and well-structured',
-              date: '2 days ago',
-            );
-          },
-        ),
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_reviews.isEmpty)
+          Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.reviews_outlined,
+                  size: 48,
+                  color: AppColors.secondary.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No reviews yet. ',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: AppColors.secondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Be the first to write a review!',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.secondary.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _reviews.length,
+            itemBuilder: (context, index) {
+              final review = _reviews[index];
+              return _buildReviewTile(
+                context,
+                name: review.userName,
+                rating: review.rating,
+                comment: review.comment,
+                date: _formatDate(review.createdAt),
+              );
+            },
+          ),
       ],
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      if (difference.inHours == 0) {
+        return '${difference.inMinutes} minutes ago';
+      }
+      return '${difference.inHours} hours ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   Widget _buildReviewTile(
@@ -76,7 +141,7 @@ class ReviewsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

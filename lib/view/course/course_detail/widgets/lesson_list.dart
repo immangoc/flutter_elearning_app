@@ -1,3 +1,5 @@
+import 'package:e_learning/models/course.dart';
+import 'package:e_learning/repositories/course_repository.dart';
 import 'package:e_learning/services/dummy_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -5,7 +7,7 @@ import '../../../../core/theme/app_color.dart';
 import '../../../../routes/app_routes.dart';
 import 'lesson_tile.dart';
 
-class LessonList extends StatelessWidget {
+class LessonList extends StatefulWidget {
   final String courseId;
   final bool isUnlocked;
   final VoidCallback? onLessonComplete;
@@ -18,29 +20,84 @@ class LessonList extends StatelessWidget {
   });
 
   @override
+  State<LessonList> createState() => _LessonListState();
+}
+
+class _LessonListState extends State<LessonList> {
+  final CourseRepository _courseRepository = CourseRepository();
+  Course? _course;
+  bool _isLoading = true;
+  Set<String> _completedLessons = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourse();
+  }
+
+  Future<void> _loadCourse() async {
+    try {
+      final course = await _courseRepository.getCourseDetail(widget.courseId);
+      final completedLessons = await _courseRepository.getCompletedLessons(
+        widget.courseId,
+      );
+      setState(() {
+        _course = course;
+        _completedLessons = completedLessons;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      Get.snackbar(
+        'Error',
+        'Failed to load course lessons: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final course = DummyDataService.getCourseById(courseId);
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if(_course == null) {
+      return const Center(
+        child: Text('No Lessons Available'),
+      );
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: course.lessons.length,
+      itemCount: _course!.lessons.length,
       itemBuilder: (context, index) {
-        final lesson = course.lessons[index];
+        final lesson = _course!.lessons[index];
         final isLocked =
             !lesson.isPreview &&
             (index > 0 &&
                 !DummyDataService.isLessonCompleted(
-                  course.id,
-                  course.lessons[index - 1].id,
+                  _course!.id,
+                  _course!.lessons[index - 1].id,
                 ));
         return LessonTile(
           title: lesson.title,
           duration: '${lesson.duration} min',
-          isCompleted: DummyDataService.isLessonCompleted(courseId, lesson.id),
+          isCompleted: DummyDataService.isLessonCompleted(
+            widget.courseId,
+            lesson.id,
+          ),
           isLocked: isLocked,
-          isUnlocked: isUnlocked,
+          isUnlocked: widget.isUnlocked,
           onTap: () async {
-            if (course.isPremium && !isUnlocked) {
+            if (_course!.isPremium && !widget.isUnlocked) {
               Get.snackbar(
                 'Premium Course',
                 'Please purchase this course to access all lessons',
@@ -60,10 +117,10 @@ class LessonList extends StatelessWidget {
               //navigate to lesson screen
               final result = await Get.toNamed(
                 AppRoutes.lesson.replaceAll(':id', lesson.id),
-                parameters: {'courseId': courseId},
+                parameters: {'courseId': widget.courseId},
               );
               if (result == true) {
-                onLessonComplete?.call();
+                widget.onLessonComplete?.call();
               }
             }
           },
