@@ -10,12 +10,14 @@ class FilteredCourseBloc
   final CourseRepository _courseRepository;
   String? _currentCategoryId;
   String? _currentLevel;
+  String? _currentSearchQuery;
 
   FilteredCourseBloc({required CourseRepository courseRepository})
     : _courseRepository = courseRepository,
       super(FilteredCourseInitial()) {
     on<FilterCoursesByCategory>(_onFilterCoursesByCategory);
     on<FilterCourseByLevel>(_onFilterCoursesByLevel);
+    on<SearchCourses>(_onSearchCourses);
     on<ClearFilteredCourses>(_onClearFilteredCourses);
   }
 
@@ -32,6 +34,7 @@ class FilteredCourseBloc
           courses,
           categoryId: _currentCategoryId,
           level: _currentLevel,
+          searchQuery: _currentSearchQuery,
         ),
       );
     } catch (e) {
@@ -39,7 +42,7 @@ class FilteredCourseBloc
     }
   }
 
-Future<void> _onFilterCoursesByLevel(
+  Future<void> _onFilterCoursesByLevel(
     FilterCourseByLevel event,
     Emitter<FilteredCourseState> emit,
   ) async {
@@ -52,6 +55,7 @@ Future<void> _onFilterCoursesByLevel(
           courses,
           categoryId: _currentCategoryId,
           level: _currentLevel,
+          searchQuery: _currentSearchQuery,
         ),
       );
     } catch (e) {
@@ -59,25 +63,43 @@ Future<void> _onFilterCoursesByLevel(
     }
   }
 
+  Future<void> _onSearchCourses(
+    SearchCourses event,
+    Emitter<FilteredCourseState> emit,
+  ) async {
+    emit(FilteredCourseLoading());
+    try {
+      _currentSearchQuery = event.query.trim();
+      final courses = await _filterCourses();
+      emit(
+        FilteredCoursesLoaded(
+          courses,
+          categoryId: _currentCategoryId,
+          level: _currentLevel,
+          searchQuery: _currentSearchQuery,
+        ),
+      );
+    } catch (e) {
+      emit(FilteredCourseError(e.toString()));
+    }
+  }
 
   void _onClearFilteredCourses(
     ClearFilteredCourses event,
     Emitter<FilteredCourseState> emit,
   ) async {
     emit(FilteredCourseLoading());
-    try{
+    try {
       //only clear level filter, maintain category filter
       _currentLevel = null;
+      _currentSearchQuery = null;
       final courses = await _filterCourses();
-      if(_currentCategoryId != null){
-        emit(FilteredCoursesLoaded(
-          courses,
-          categoryId: _currentCategoryId,
-        ));
+      if (_currentCategoryId != null) {
+        emit(FilteredCoursesLoaded(courses, categoryId: _currentCategoryId));
       } else {
         emit(FilteredCourseInitial());
       }
-    }catch (e) {
+    } catch (e) {
       emit(FilteredCourseError(e.toString()));
     }
   }
@@ -88,11 +110,25 @@ Future<void> _onFilterCoursesByLevel(
       categoryID: _currentCategoryId,
     );
 
+    var filteredCourses = courses;
+
     // apply level filter if set
     if (_currentLevel != null && _currentLevel != 'All Levels') {
-      return courses.where((course) => course.level == _currentLevel).toList();
+      filteredCourses = filteredCourses
+          .where((courses) => courses.level == _currentLevel)
+          .toList();
     }
-
-    return courses;
+    // apply search query filter if set
+    if (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty) {
+      final query = _currentSearchQuery!.toLowerCase();
+      filteredCourses = filteredCourses
+          .where(
+            (courses) =>
+                courses.title.toLowerCase().contains(query) ||
+                courses.description.toLowerCase().contains(query),
+          )
+          .toList();
+    }
+    return filteredCourses;
   }
 }

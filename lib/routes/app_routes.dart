@@ -2,6 +2,7 @@ import 'package:e_learning/main_screen.dart';
 import 'package:e_learning/view/chat/chat_list_screen.dart';
 import 'package:e_learning/view/course/analytics_dashboard/analytics_dashboard_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
+import 'package:e_learning/view/course/course_search/course_search_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/help_and_support/help_and_support_screen.dart';
 import 'package:e_learning/view/home/home_screen.dart';
@@ -42,10 +43,12 @@ class AppRoutes {
 
   //Course
   static const String courseList = '/courses';
+  static const String courseSearch = '/course/search';
   static const String courseDetail = '/course/:id';
   static const String payment = '/payment';
   static const String analytics = '/analytics';
   static const String lesson = '/lesson/:id';
+
 
   // Quiz
   static const String quizList = '/quizzes';
@@ -60,7 +63,6 @@ class AppRoutes {
   static const String privacyPolicy = '/privacy-policy';
   static const String termsConditions = '/terms-conditions';
   static const String helpSupport = '/help-support';
-
 
   // Teacher
   static const String teacherHome = '/teacher/home';
@@ -99,6 +101,9 @@ class AppRoutes {
 
       case home:
         return MaterialPageRoute(builder: (_) => HomeScreen());
+
+      case courseSearch:
+        return MaterialPageRoute(builder: (_) => const CourseSearchScreen());
 
       case teacherHome:
         return MaterialPageRoute(builder: (_) => const TeacherHomeScreen());

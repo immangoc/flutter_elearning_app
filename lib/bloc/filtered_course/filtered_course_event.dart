@@ -12,4 +12,10 @@ class FilterCourseByLevel extends FilteredCourseEvent {
   FilterCourseByLevel(this.level);
 }
 
+class SearchCourses extends FilteredCourseEvent {
+  final String query;
+
+  SearchCourses(this.query);
+}
+
 class ClearFilteredCourses extends FilteredCourseEvent {}

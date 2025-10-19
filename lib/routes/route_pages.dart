@@ -5,6 +5,7 @@ import 'package:e_learning/view/auth/login_screen.dart';
 import 'package:e_learning/view/chat/chat_list_screen.dart';
 import 'package:e_learning/view/course/analytics_dashboard/analytics_dashboard_screen.dart';
 import 'package:e_learning/view/course/course_list/course_list_screen.dart';
+import 'package:e_learning/view/course/course_search/course_search_screen.dart';
 import 'package:e_learning/view/course/lesson_screen/lesson_screen.dart';
 import 'package:e_learning/view/course/payment/payment_screen.dart';
 import 'package:e_learning/view/help_and_support/help_and_support_screen.dart';
@@ -87,6 +88,11 @@ class AppPages {
     ),
 
     GetPage(
+      name: AppRoutes.courseSearch,
+      page: () => const CourseSearchScreen(),
+    ),
+
+    GetPage(
       name: '/course/:id',
       page: () => CourseDetailScreen(courseId: Get.parameters['id'] ?? ''),
     ),
@@ -104,11 +110,20 @@ class AppPages {
 
     GetPage(name: AppRoutes.setting, page: () => const SettingsScreen()),
 
-    GetPage(name: AppRoutes.privacyPolicy, page: () => const PrivacyPolicyScreen()),
+    GetPage(
+      name: AppRoutes.privacyPolicy,
+      page: () => const PrivacyPolicyScreen(),
+    ),
 
-    GetPage(name: AppRoutes.termsConditions, page: () => const TermsConditionsScreen()),
+    GetPage(
+      name: AppRoutes.termsConditions,
+      page: () => const TermsConditionsScreen(),
+    ),
 
-    GetPage(name: AppRoutes.helpSupport, page: () => const HelpAndSupportScreen()),
+    GetPage(
+      name: AppRoutes.helpSupport,
+      page: () => const HelpAndSupportScreen(),
+    ),
 
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
 
@@ -132,5 +147,7 @@ class AppPages {
     ),
 
     GetPage(name: AppRoutes.teacherChats, page: () => const ChatListScreen()),
+
+
   ];
 }
