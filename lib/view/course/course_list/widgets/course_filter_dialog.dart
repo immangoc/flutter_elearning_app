@@ -2,8 +2,49 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_color.dart';
 
-class CourseFilterDialog extends StatelessWidget {
-  const CourseFilterDialog({super.key});
+class CourseFilterDialog extends StatefulWidget {
+  final Function(String) onLevelSelected;
+  final String? initialLevel;
+
+  const CourseFilterDialog({
+    super.key,
+    required this.onLevelSelected,
+    this.initialLevel,
+  });
+
+  @override
+  State<CourseFilterDialog> createState() => _CourseFilterDialogState();
+}
+
+class _CourseFilterDialogState extends State<CourseFilterDialog> {
+  late String _selectedLevel;
+  final List<String> _levels = [
+    'All Levels',
+    'Beginner',
+    'Intermediate',
+    'Advanced',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLevel = widget.initialLevel ?? 'All Levels';
+  }
+
+  void _handleApplyFilter() {
+    widget.onLevelSelected(_selectedLevel);
+    Navigator.pop(context);
+  }
+
+  void _handleResetFilter() {
+    setState(() {
+      _selectedLevel = 'All Levels';
+    });
+    widget.onLevelSelected('All Levels');
+    Navigator.pop(context);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,47 +62,44 @@ class CourseFilterDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildFilterOption(context, 'All Levels', true),
-          _buildFilterOption(context, 'Beginner', false),
-          _buildFilterOption(context, 'Intermediate', false),
-          _buildFilterOption(context, 'Advanced', false),
+          ..._levels.map(_buildFilterOption),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: _handleResetFilter,
                   child: const Text('Reset'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: _handleApplyFilter,
                   child: const Text('Apply'),
                 ),
               ),
             ],
           ),
-
         ],
       ),
     );
   }
 
   Widget _buildFilterOption(
-      BuildContext context,
-      String label,
-      bool isSelected
-      ){
+    String level,
+  ) {
+    final isSelected = _selectedLevel == level;
     return ListTile(
-      title: Text(label),
-      trailing: isSelected ? Icon(Icons.check_circle, color: AppColors.primary)
-          : const Icon(Icons.circle_outlined,
-      ),
+      title: Text(level),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: AppColors.primary)
+          : const Icon(Icons.circle_outlined),
       onTap: () {
-        Navigator.pop(context);
-      }
+       setState(() {
+         _selectedLevel = level;
+       });
+      },
     );
   }
 }

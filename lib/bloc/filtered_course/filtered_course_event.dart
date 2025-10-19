@@ -6,4 +6,10 @@ class FilterCoursesByCategory extends FilteredCourseEvent {
   FilterCoursesByCategory(this.categoryId);
 }
 
+class FilterCourseByLevel extends FilteredCourseEvent {
+  final String level;
+
+  FilterCourseByLevel(this.level);
+}
+
 class ClearFilteredCourses extends FilteredCourseEvent {}

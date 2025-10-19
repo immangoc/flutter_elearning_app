@@ -32,6 +32,8 @@ class CourseListScreen extends StatefulWidget {
 }
 
 class _CourseListScreenState extends State<CourseListScreen> {
+  String? _currentLevel;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +61,9 @@ class _CourseListScreenState extends State<CourseListScreen> {
   Widget _buildAllCourseList(ThemeData theme) {
     return BlocBuilder<CourseBloc, CourseState>(
       builder: (context, state) {
+        final courses = state is CoursesLoaded
+            ? _filterCoursesByLevel(state.courses)
+            : null;
         return _buildCourseListView(
           theme: theme,
           isLoading: state is CourseLoading,
@@ -121,7 +126,7 @@ class _CourseListScreenState extends State<CourseListScreen> {
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: const EdgeInsets.all(6),
             title: Text(
-              widget.categoryName ?? 'All Courses',
+              _buildScreenTitle(),
               style: theme.textTheme.titleLarge?.copyWith(
                 color: AppColors.accent,
                 fontWeight: FontWeight.bold,
@@ -192,7 +197,47 @@ class _CourseListScreenState extends State<CourseListScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => const CourseFilterDialog(),
+      builder: (context) => CourseFilterDialog(
+        onLevelSelected: _handleLevelFilter,
+        initialLevel: _currentLevel,
+      ),
     );
+  }
+
+  void _handleLevelFilter(String level) {
+    setState(() {
+      _currentLevel = level == 'All Levels' ? null : level;
+    });
+    if (widget.categoryId != null) {
+      if (level == 'All Levels') {
+        context.read<FilteredCourseBloc>().add(ClearFilteredCourses());
+      } else {
+        context.read<FilteredCourseBloc>().add(FilterCourseByLevel(level));
+      }
+    } else {
+      context.read<CourseBloc>().add(LoadCourses());
+    }
+  }
+
+  List<Course> _filterCoursesByLevel(List<Course> courses) {
+    if (_currentLevel == null || _currentLevel == 'All Levels') {
+      return courses;
+    }
+    return courses.where((course) => course.level == _currentLevel).toList();
+  }
+
+  String _buildScreenTitle() {
+    final List<String> titleParts = [];
+
+    if (widget.categoryName != null) {
+      titleParts.add(widget.categoryName!);
+    }
+    if (_currentLevel != null && _currentLevel != 'All Levels') {
+      titleParts.add(_currentLevel!);
+    }
+    if (titleParts.isEmpty) {
+      return 'All Courses';
+    }
+    return titleParts.join(' - ');
   }
 }
