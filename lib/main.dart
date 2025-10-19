@@ -16,6 +16,8 @@ import 'package:e_learning/core/theme/app_theme.dart';
 import 'package:e_learning/routes/app_routes.dart';
 import 'package:e_learning/routes/route_pages.dart';
 
+import 'bloc/filtered_course/filtered_course_bloc.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseConfig.init();
@@ -35,21 +37,27 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider<FontBloc>(create: (context) => FontBloc()),
         BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
-        BlocProvider<ProfileBloc>(create: (context) => ProfileBloc(
-          authBloc: context.read<AuthBloc>(),
-        )),
-        BlocProvider<CourseBloc>(create: (context) => CourseBloc(
-          authBloc: context.read<AuthBloc>(),
-          courseRepository: CourseRepository(),
-        )),
+        BlocProvider<ProfileBloc>(
+          create: (context) => ProfileBloc(authBloc: context.read<AuthBloc>()),
+        ),
+        BlocProvider<CourseBloc>(
+          create: (context) => CourseBloc(
+            authBloc: context.read<AuthBloc>(),
+            courseRepository: CourseRepository(),
+          ),
+        ),
+        BlocProvider<FilteredCourseBloc>(
+          create: (context) =>
+              FilteredCourseBloc(courseRepository: CourseRepository()),
+        ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if(state.error != null) {
+          if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-               content: Text(state.error!),
-               backgroundColor: Colors.red,
+                content: Text(state.error!),
+                backgroundColor: Colors.red,
               ),
             );
           }

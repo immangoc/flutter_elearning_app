@@ -1,7 +1,10 @@
+import 'package:e_learning/bloc/filtered_course/filtered_course_bloc.dart';
 import 'package:e_learning/models/category.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
+import '../../../bloc/filtered_course/filtered_course_event.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../routes/app_routes.dart';
 
@@ -46,7 +49,7 @@ class CategorySection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -56,7 +59,7 @@ class CategorySection extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _handleCategoryTap(category),
+          onTap: () => _handleCategoryTap(context, category),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -77,9 +80,9 @@ class CategorySection extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${category.courseCount} courses',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.secondary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.secondary),
                 ),
               ],
             ),
@@ -89,14 +92,15 @@ class CategorySection extends StatelessWidget {
     );
   }
 
-  void _handleCategoryTap(Category category) {
-
+  void _handleCategoryTap(BuildContext context, Category category) {
     Get.toNamed(
       AppRoutes.courseList,
-      arguments: {
-        'categoryId': category.id,
-        'categoryName': category.name,
-      },
+      arguments: {'category': category.id, 'categoryName': category.name},
+      parameters: {'category': category.id, 'categoryName': category.name},
+    );
+    context.
+    read<FilteredCourseBloc>().
+    add(FilterCoursesByCategory(category.id),
     );
   }
 }

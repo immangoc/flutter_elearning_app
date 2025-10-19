@@ -20,7 +20,7 @@ class CategoryRepository {
 
       //count courses by category
       for (var course in coursesSnapshot.docs) {
-        final categoryId = course.data()['category'] as String?;
+        final categoryId = course.data()['categoryID'] as String?;
         if (categoryId != null) {
           courseCounts[categoryId] = (courseCounts[categoryId] ?? 0) + 1;
         }

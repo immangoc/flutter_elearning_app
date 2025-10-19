@@ -1,5 +1,7 @@
 import 'package:e_learning/bloc/course/course_bloc.dart';
 import 'package:e_learning/bloc/course/course_event.dart';
+import 'package:e_learning/bloc/filtered_course/filtered_course_bloc.dart';
+import 'package:e_learning/bloc/filtered_course/filtered_course_state.dart';
 import 'package:e_learning/core/theme/app_color.dart';
 import 'package:e_learning/view/course/course_list/widgets/course_filter_dialog.dart';
 import 'package:e_learning/view/course/course_list/widgets/empty_state_widget.dart';
@@ -10,6 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 import '../../../bloc/course/course_state.dart';
+import '../../../bloc/filtered_course/filtered_course_event.dart';
+import '../../../models/course.dart';
 
 class CourseListScreen extends StatefulWidget {
   final String? categoryId;
@@ -32,110 +36,153 @@ class _CourseListScreenState extends State<CourseListScreen> {
   void initState() {
     super.initState();
     //Load course when screen is initialized
-    context.read<CourseBloc>().add(LoadCourses(categoryID: widget.categoryId));
+    if (widget.categoryId != null) {
+      context.read<FilteredCourseBloc>().add(
+        FilterCoursesByCategory(widget.categoryId!),
+      );
+    } else {
+      context.read<CourseBloc>().add(LoadCourses());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: BlocBuilder<CourseBloc, CourseState>(
-        builder: (context, state) {
-          return CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 200,
-                pinned: true,
-                backgroundColor: AppColors.primary,
-                automaticallyImplyLeading:
-                    widget.categoryId != null || widget.showBackButton,
-                leading: (widget.categoryId != null || widget.showBackButton)
-                    ? IconButton(
-                        onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back),
-                      )
-                    : null,
-                actions: [
-                  IconButton(
-                    onPressed: () => _showFilterDialog(context),
-                    icon: const Icon(
-                      Icons.filter_list,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                ],
-                flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: const EdgeInsets.all(6),
-                  title: Text(
-                    widget.categoryName ?? 'All Courses',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: AppColors.accent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryLight],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                  ),
+      body: widget.categoryId != null
+          ? _buildFilteredCourseList(theme)
+          : _buildAllCourseList(theme),
+    );
+  }
+
+  Widget _buildAllCourseList(ThemeData theme) {
+    return BlocBuilder<CourseBloc, CourseState>(
+      builder: (context, state) {
+        return _buildCourseListView(
+          theme: theme,
+          isLoading: state is CourseLoading,
+          error: state is CourseError ? state.message : null,
+          courses: state is CoursesLoaded ? state.courses : null,
+        );
+      },
+    );
+  }
+
+  Widget _buildFilteredCourseList(ThemeData theme) {
+    return BlocBuilder<FilteredCourseBloc, FilteredCourseState>(
+      builder: (context, state) {
+        return _buildCourseListView(
+          theme: theme,
+          isLoading: state is FilteredCourseLoading,
+          error: state is FilteredCourseError
+              ? (state as FilteredCourseError).message
+              : null,
+          courses: state is FilteredCoursesLoaded ? state.courses : null,
+        );
+      },
+    );
+  }
+
+  Widget _buildCourseListView({
+    required ThemeData theme,
+    required bool isLoading,
+    String? error,
+    List<Course>? courses,
+  }) {
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          expandedHeight: 200,
+          pinned: true,
+          backgroundColor: AppColors.primary,
+          automaticallyImplyLeading:
+              widget.categoryId != null || widget.showBackButton,
+          leading: (widget.categoryId != null || widget.showBackButton)
+              ? IconButton(
+                  onPressed: () {
+                    Get.back();
+                    if (widget.categoryId != null) {
+                      context.read<FilteredCourseBloc>().add(
+                        ClearFilteredCourses(),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_back, color: AppColors.accent),
+                )
+              : null,
+          actions: [
+            IconButton(
+              onPressed: () => _showFilterDialog(context),
+              icon: const Icon(Icons.filter_list, color: AppColors.accent),
+            ),
+          ],
+          flexibleSpace: FlexibleSpaceBar(
+            titlePadding: const EdgeInsets.all(6),
+            title: Text(
+              widget.categoryName ?? 'All Courses',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            background: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
+            ),
+          ),
+        ),
 
-              if (state is CourseLoading)
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => const ShimmerCourseCard(),
-                      childCount: 5,
-                    ),
-                  ),
-                )
-              else if (state is CourseError)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      state.message,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppColors.error,
-                      ),
-                    ),
-                  ),
-                )
-              else if (state is CoursesLoaded && state.courses.isEmpty)
-                SliverFillRemaining(
-                  child: EmptyStateWidget(onActionPressed: () => Get.back()),
-                )
-              else if (state is CoursesLoaded)
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final course = state.courses[index];
-                      return CourseCard(
-                        courseId: course.id,
-                        title: course.title,
-                        subtitle: course.description,
-                        imageUrl: course.imageUrl,
-                        rating: course.rating,
-                        duration: '${course.lessons.length * 30} mins',
-                        isPremium: course.isPremium,
-                      );
-                    }, childCount: state.courses.length),
-                  ),
+        if (isLoading)
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => const ShimmerCourseCard(),
+                childCount: 5,
+              ),
+            ),
+          )
+        else if (error != null)
+          SliverFillRemaining(
+            child: Center(
+              child: Text(
+                error,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: AppColors.error,
                 ),
-            ],
-          );
-        },
-      ),
+              ),
+            ),
+          )
+        else if (courses == null || courses.isEmpty)
+          SliverFillRemaining(
+            child: EmptyStateWidget(onActionPressed: () => Get.back()),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final course = courses[index];
+                return CourseCard(
+                  courseId: course.id,
+                  title: course.title,
+                  subtitle: course.description,
+                  imageUrl: course.imageUrl,
+                  rating: course.rating,
+                  duration: '${course.lessons.length * 30} mins',
+                  isPremium: course.isPremium,
+                );
+              }, childCount: courses.length),
+            ),
+          ),
+      ],
     );
   }
 
