@@ -78,3 +78,11 @@ class UpdateProfileRequested extends AuthEvent {
   @override
   List<Object?> get props => [fullName, photoUrl, bio, phoneNumber];
 }
+
+
+class GoogleSignInRequested extends AuthEvent {
+  const GoogleSignInRequested();
+
+  @override
+  List<Object?> get props => [];
+}

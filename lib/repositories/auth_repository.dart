@@ -2,24 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_learning/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:google_sign_in/google_sign_in.dart';
+
 class AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
 
-  AuthRepository({FirebaseAuth? firebaseAuth, FirebaseFirestore? firestore})
-    : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-      _firestore = firestore ?? FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn;
+
+  AuthRepository({
+    FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+    GoogleSignIn? googleSignIn,
+  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _googleSignIn = googleSignIn ?? GoogleSignIn();
+
 
   Stream<UserModel?> get authStateChanges {
     return _firebaseAuth.authStateChanges().asyncMap((user) async {
       if (user == null) return null;
 
-      //Get user data from firebase
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (doc.exists) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'lastloginAt': Timestamp.now(),
+        });
         return UserModel.fromFirestore(doc);
       }
-      return null;
+
+      return _ensureUserDocument(user);
     });
   }
 
@@ -44,11 +56,7 @@ class AuthRepository {
         lastloginAt: DateTime.now(),
         role: role,
       );
-      //save user date to fire
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(user.toFirestore());
+      await _firestore.collection('users').doc(user.uid).set(user.toFirestore());
       return user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -65,20 +73,15 @@ class AuthRepository {
         password: password,
       );
 
-      //Get user data from firestore
-      final doc = await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
+      final uid = userCredential.user!.uid;
+      final doc = await _firestore.collection('users').doc(uid).get();
 
       if (!doc.exists) {
-        throw Exception('User data not found');
+        return _ensureUserDocument(userCredential.user!);
       }
 
       final user = UserModel.fromFirestore(doc);
-
-      //update last login time
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection('users').doc(uid).update({
         'lastloginAt': Timestamp.now(),
       });
       return user;
@@ -87,7 +90,35 @@ class AuthRepository {
     }
   }
 
+
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      final account = await _googleSignIn.signIn();
+      if (account == null) {
+        throw Exception('Google sign-in was cancelled.');
+      }
+
+      final auth = await account.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: auth.idToken,
+        accessToken: auth.accessToken,
+      );
+
+      final userCred = await _firebaseAuth.signInWithCredential(credential);
+      final fbUser = userCred.user!;
+
+      final ensured = await _ensureUserDocument(fbUser);
+      return ensured;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
   Future<void> signOut() async {
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {}
     await _firebaseAuth.signOut();
   }
 
@@ -101,7 +132,7 @@ class AuthRepository {
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('User not found');
 
-      final updates = <String, dynamic> {};
+      final updates = <String, dynamic>{};
 
       if (fullName != null) {
         await user.updateDisplayName(fullName);
@@ -111,15 +142,12 @@ class AuthRepository {
         await user.updatePhotoURL(photoUrl);
         updates['photoUrl'] = photoUrl;
       }
+      if (phoneNumber != null) updates['phoneNumber'] = phoneNumber;
+      if (bio != null) updates['bio'] = bio;
 
-      if(phoneNumber != null) updates['phoneNumber'] = phoneNumber;
-      if(bio != null) updates['bio'] = bio;
-
-      //update firestore if there are changes
-      if(updates.isNotEmpty) {
+      if (updates.isNotEmpty) {
         await _firestore.collection('users').doc(user.uid).update(updates);
       }
-
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
@@ -127,10 +155,33 @@ class AuthRepository {
 
   Future<void> resetPassword(String email) async {
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
+  }
+
+  Future<UserModel> _ensureUserDocument(User fbUser) async {
+    final ref = _firestore.collection('users').doc(fbUser.uid);
+    final snap = await ref.get();
+
+    if (snap.exists) {
+      await ref.update({'lastloginAt': Timestamp.now()});
+      return UserModel.fromFirestore(snap);
+    }
+
+    final user = UserModel(
+      uid: fbUser.uid,
+      email: fbUser.email ?? '',
+      fullName: fbUser.displayName ?? (fbUser.email ?? '').split('@').first,
+      createdAt: DateTime.now(),
+      lastloginAt: DateTime.now(),
+      role: UserRole.student,
+      photoUrl: fbUser.photoURL,
+    );
+
+    await ref.set(user.toFirestore());
+    return user;
   }
 
   String _handleAuthException(FirebaseAuthException e) {
@@ -148,7 +199,7 @@ class AuthRepository {
       case 'user-disabled':
         return 'This account has been disabled';
       case 'operation-not-allowed':
-        return 'Email & Password sign-in is not enabled';
+        return 'This sign-in method is not enabled';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later';
       case 'invalid-credential':

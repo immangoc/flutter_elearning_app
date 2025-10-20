@@ -171,30 +171,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
 
                       // Social Login Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _socialLoginButton(
-                              icon: Icons.g_mobiledata_outlined,
-                              onPressed: () {},
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _socialLoginButton(
-                              icon: Icons.facebook,
-                              onPressed: () {},
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _socialLoginButton(
-                              icon: Icons.apple,
-                              onPressed: () {},
-                            ),
-                          ),
-                        ],
+                      // Social Login Buttons
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          final isBusy = state.isLoading;
+
+                          return Row(
+                            children: [
+                              // GOOGLE
+                              Expanded(
+                                child: _socialLoginButton(
+                                  icon: Icons.g_mobiledata_outlined,
+                                  onPressed: isBusy
+                                      ? () {}
+                                      : () => context.read<AuthBloc>().add(const GoogleSignInRequested()),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+
+                              Expanded(
+                                child: _socialLoginButton(
+                                  icon: Icons.facebook,
+                                  onPressed: isBusy ? () {} : () { /* TODO: dispatch FacebookSignInRequested */ },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+
+                              Expanded(
+                                child: _socialLoginButton(
+                                  icon: Icons.apple,
+                                  onPressed: isBusy ? () {} : () { /* TODO: dispatch AppleSignInRequested */ },
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
+
                       const SizedBox(height: 20),
 
                       // Register Link
