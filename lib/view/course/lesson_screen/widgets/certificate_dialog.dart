@@ -1,15 +1,14 @@
 import 'package:e_learning/models/course.dart';
+import 'package:e_learning/view/certificate/certificate_preview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_color.dart';
 
 class CertificateDialog extends StatelessWidget {
   final Course course;
-  final VoidCallback onDownload;
   const CertificateDialog({
     super.key,
     required this.course,
-    required this.onDownload,
   });
 
   @override
@@ -60,7 +59,7 @@ class CertificateDialog extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Get.back();
-                  onDownload();
+                  Get.to(() => CertificatePreviewScreen(course: course));
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -70,7 +69,7 @@ class CertificateDialog extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                 ),
                 child: const Text(
-                  'Later',
+                  'View Certificate',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),

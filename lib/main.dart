@@ -25,6 +25,8 @@ Future<void> main() async {
 
   await StorageService.init();
   //await GetStorage().erase();
+
+  Get.put<RouteObserver<PageRoute>>(RouteObserver<PageRoute>());
   runApp(const MyApp());
 }
 
@@ -64,6 +66,7 @@ class MyApp extends StatelessWidget {
         },
         child: BlocBuilder<FontBloc, FontState>(
           builder: (context, fontState) {
+            final routeObserver = Get.find<RouteObserver<PageRoute>>();
             return GetMaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'E - Learning',
@@ -72,6 +75,7 @@ class MyApp extends StatelessWidget {
               initialRoute: AppRoutes.splash,
               onGenerateRoute: AppRoutes.onGenerateRoute,
               getPages: AppPages.pages,
+              navigatorObservers: [routeObserver],
             );
           },
         ),

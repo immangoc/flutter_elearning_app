@@ -1,6 +1,7 @@
 import 'package:chewie/chewie.dart';
+import 'package:e_learning/repositories/course_repository.dart';
 import 'package:e_learning/routes/app_routes.dart';
-import 'package:e_learning/services/dummy_data_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:get/get.dart';
@@ -13,12 +14,15 @@ class LessonVideoController {
   final String lessonId;
   final Function(bool) onLoadingChanged;
   final Function(Course) onCertificateEarned;
+  final CourseRepository _courseRepository;
+  final FirebaseAuth _auth;
 
   LessonVideoController({
     required this.lessonId,
     required this.onLoadingChanged,
     required this.onCertificateEarned,
-  });
+  }) : _courseRepository = CourseRepository(),
+       _auth = FirebaseAuth.instance;
 
   Future<void> initializeVideo() async {
     try {
@@ -31,10 +35,37 @@ class LessonVideoController {
         onLoadingChanged(false);
         return;
       }
-      final course = DummyDataService.getCourseById(courseId);
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        debugPrint('No authenticated user found');
+        onLoadingChanged(false);
+        return;
+      }
+
+      final course = await _courseRepository.getCourseDetail(courseId);
       debugPrint('course: $course');
 
-      if (course.isPremium && !DummyDataService.isCourseUnlocked(courseId)) {
+      final isUnlocked = await _courseRepository.isLessonUnlocked(
+        courseId,
+        lessonId,
+        user.uid,
+      );
+      final isEnrolled = await _courseRepository.isEnrolled(courseId, user.uid);
+
+      if (!isUnlocked) {
+        onLoadingChanged(false);
+        Get.back();
+        Get.snackbar(
+          'Lesson Locked',
+          'Please complete previous lessons first',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (course.isPremium && !isEnrolled) {
         onLoadingChanged(false);
         Get.back();
         Get.toNamed(
@@ -47,6 +78,13 @@ class LessonVideoController {
         );
         return;
       }
+
+      if (!course.isPremium &&
+          !isEnrolled &&
+          course.lessons.first.id == lessonId) {
+        await _courseRepository.enrollInCourse(courseId, user.uid);
+      }
+
       final lesson = course.lessons.firstWhere(
         (lesson) => lesson.id == lessonId,
         orElse: () => course.lessons.first,
@@ -81,55 +119,61 @@ class LessonVideoController {
     }
   }
 
-  void onVideoProgressChanged(String courseId) {
+  void onVideoProgressChanged(String courseId) async {
     if (videoPlayerController != null &&
         videoPlayerController!.value.position >=
             videoPlayerController!.value.duration) {
-      markLessonAsCompleted(courseId);
+      await markLessonAsCompleted(courseId);
       videoPlayerController?.removeListener(
         () => onVideoProgressChanged(courseId),
       );
     }
   }
+  Future<void> markLessonAsCompleted(String courseId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
 
-  void markLessonAsCompleted(String courseId) async {
-    if (courseId != null) {
-      final course = DummyDataService.getCourseById(courseId);
+      final course = await _courseRepository.getCourseDetail(courseId);
       final lessonIndex = course.lessons.indexWhere((l) => l.id == lessonId);
+      if (lessonIndex == -1) return;
 
-      if (lessonIndex != -1) {
-        DummyDataService.updateLessonStatus(
-          courseId,
-          lessonId,
-          isCompleted: true,
-        );
+      var completedLessons = await _courseRepository.getCompletedLessons(courseId, user.uid);
 
-        if (lessonIndex < course.lessons.length - 1) {
-          DummyDataService.updateLessonStatus(
-            courseId,
-            course.lessons[lessonIndex + 1].id,
-            isCompleted: false,
-          );
-        }
-
-        final isLastLesson = lessonIndex == course.lessons.length - 1;
-        final allLessonCompleted = DummyDataService.isCourseCompleted(courseId);
-
-        Get.back(result: true);
-
-        if (isLastLesson && allLessonCompleted) {
-          onCertificateEarned(course);
-        } else {
-          Get.snackbar(
-            'Lesson Completed',
-            'You can now proceed to the next lesson',
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
-        }
+      if (!completedLessons.contains(lessonId)) {
+        await _courseRepository.markLessonAsCompleted(courseId, lessonId, user.uid);
+        completedLessons = await _courseRepository.getCompletedLessons(courseId, user.uid);
       }
+
+      if (lessonIndex < course.lessons.length - 1) {
+        await _courseRepository.unlockLesson(
+          courseId,
+          course.lessons[lessonIndex + 1].id,
+          user.uid,
+        );
+      }
+
+      final isLastLesson = lessonIndex == course.lessons.length - 1;
+      final allLessonCompleted = completedLessons.length == course.lessons.length;
+
+      if (isLastLesson && allLessonCompleted) {
+        onCertificateEarned(course);
+      } else {
+        Get.back(result: true);
+        final progress = await _courseRepository.getCourseProgress(courseId, user.uid);
+        Get.snackbar(
+          'Lesson Completed',
+          'Course Progress: ${progress.toStringAsFixed(1)}%',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error marking lesson as completed: $e');
     }
   }
+
 
   void dispose() {
     videoPlayerController?.removeListener(
