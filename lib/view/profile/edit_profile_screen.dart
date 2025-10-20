@@ -235,10 +235,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 controller: _fullNameController,
                               ),
                               const SizedBox(height: 16),
-                              const CustomTextfield(
+                              CustomTextfield(
                                 label: 'Email',
                                 prefixIcon: Icons.email_outlined,
-                                initialValue: 'immangoc@gmail.com',
+                                initialValue: profile.email ?? '',
                                 enabled: false,
                               ),
                               const SizedBox(height: 16),
