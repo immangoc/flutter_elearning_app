@@ -337,4 +337,17 @@ class CourseRepository {
       throw Exception('Failed to check enrollment status: $e');
     }
   }
+
+  Future<bool> isCourseCompleted(String courseId, String studentId) async {
+    try {
+      final course = await getCourseDetail(courseId);
+      final totalLessons = course.lessons.length;
+
+      final completedLessons = await getCompletedLessons(courseId, studentId);
+
+      return completedLessons.length == totalLessons;
+    }catch (e) {
+      throw Exception('Failed to check course completion status: $e');
+    }
+  }
 }

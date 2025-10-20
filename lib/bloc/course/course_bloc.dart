@@ -42,7 +42,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     Emitter<CourseState> emit,
   ) async {
     //first emit loading state
-    if(state is CoursesLoaded) {
+    if (state is CoursesLoaded) {
       final currentState = state as CoursesLoaded;
       emit(CoursesLoaded(currentState.courses, selectedCourse: null));
     } else {
@@ -51,13 +51,26 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
     try {
       final course = await _courseRepository.getCourseDetail(event.courseId);
-
-      //if we already have courses loaded, update the selected course
-      if(state is CoursesLoaded) {
-        final courses =  await _courseRepository.getCourse();
-        emit(CoursesLoaded(courses, selectedCourse: course));
+      final userId = _authBloc.state.userModel?.uid;
+      bool isCompleted = false;
+      if (userId != null) {
+        isCompleted = await _courseRepository.isCourseCompleted(
+          event.courseId,
+          userId,
+        );
       }
 
+      //if we already have courses loaded, update the selected course
+      if (state is CoursesLoaded) {
+        final courses = await _courseRepository.getCourse();
+        emit(
+          CoursesLoaded(
+            courses,
+            selectedCourse: course,
+            isSelectedCourseCompleted: isCompleted,
+          ),
+        );
+      }
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -72,11 +85,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         final course = await _courseRepository.getCourseDetail(event.courseId);
         emit(CourseDetailLoaded(course));
       }
-    }catch (e) {
+    } catch (e) {
       //emit error state if needed
     }
   }
-
 
   Future<void> _onEnrollCourse(
     EnrollCourse event,

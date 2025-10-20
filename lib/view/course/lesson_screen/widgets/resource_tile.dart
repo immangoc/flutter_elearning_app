@@ -1,17 +1,64 @@
 import 'package:e_learning/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../../services/file_download_service.dart';
 
-class ResourceTile extends StatelessWidget {
+class ResourceTile extends StatefulWidget {
   final String title;
   final IconData icon;
-  final VoidCallback onTap;
+  final String url;
+  final String type;
 
   const ResourceTile({
     super.key,
     required this.title,
     required this.icon,
-    required this.onTap,
+    required this.url,
+    required this.type,
   });
+
+  @override
+  State<ResourceTile> createState() => _ResourceTileState();
+}
+
+class _ResourceTileState extends State<ResourceTile> {
+  bool _isDownloading = false;
+  final _fileDownloadService = FileDownloadService();
+
+  Future<void> _handleDownload() async {
+    if (_isDownloading) return;
+    setState(() => _isDownloading = true);
+
+    try {
+      final fileName = '${widget.title}.${widget.type}';
+      final filePath = await _fileDownloadService.downloadFile(
+        widget.url,
+        fileName,
+      );
+
+      Get.snackbar(
+        'Download Complete',
+        'File downloaded to $filePath',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.accent,
+      );
+
+      await _fileDownloadService.openFile(filePath);
+    } catch (e) {
+      Get.snackbar(
+        'Download Failed',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.accent,
+      );
+    } finally {
+      if(mounted) {
+        setState(() => _isDownloading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,27 +79,39 @@ class ResourceTile extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: _handleDownload,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.primary, size: 24),
+                Icon(widget.icon, color: AppColors.primary, size: 24),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    title,
+                    widget.title,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: AppColors.primary,
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.download,
-                  color: AppColors.secondary,
-                  size: 24,
-                ),
+                if (_isDownloading)
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    ),
+                  )
+                else
+                  const Icon(
+                    Icons.download,
+                    color: AppColors.secondary,
+                    size: 24,
+                  ),
               ],
             ),
           ),
